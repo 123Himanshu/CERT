@@ -142,7 +142,9 @@ const HomePage: React.FC = () => {
 
   const filteredMedia = mediaGallery.filter(item => {
     if (selectedMediaFilter === 'all') return true;
-    return item.type === selectedMediaFilter;
+    if (selectedMediaFilter === 'images') return item.type === 'image';
+    if (selectedMediaFilter === 'videos') return item.type === 'video';
+    return false;
   });
 
   const getSeverityColor = (severity: string) => {
@@ -257,6 +259,7 @@ const HomePage: React.FC = () => {
               >
                 Cyber Awareness
               </Link>
+              
               <Link
                 to="/contact"
                 className="font-medium text-defence-gray-700 hover:text-defence-blue-600 transition-colors"
@@ -512,14 +515,14 @@ const HomePage: React.FC = () => {
               All ({mediaGallery.length})
             </button>
             <button
-              onClick={() => setSelectedMediaFilter('image')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'image' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
+              onClick={() => setSelectedMediaFilter('images')}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'images' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
             >
               Images ({mediaGallery.filter(item => item.type === 'image').length})
             </button>
             <button
-              onClick={() => setSelectedMediaFilter('video')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'video' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
+              onClick={() => setSelectedMediaFilter('videos')}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'videos' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
             >
               Videos ({mediaGallery.filter(item => item.type === 'video').length})
             </button>

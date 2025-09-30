@@ -1,111 +1,91 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { Layout } from './components/layout/Layout';
-
-// Pages
+import DemoGovernmentLogin from './components/DemoGovernmentLogin';
+import GovernmentCertLogin from './components/GovernmentCertLogin';
+import ComprehensiveDefenceDashboard from './components/ComprehensiveDefenceDashboard';
+import EnhancedCertArmyDashboard from './components/EnhancedCertArmyDashboard';
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import IncidentReportPage from './pages/IncidentReportPage';
-import IncidentDetailsPage from './pages/IncidentDetailsPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import ProfilePage from './pages/ProfilePage';
-import CyberAwarenessPage from './pages/CyberAwarenessPage';
-import ContactPage from './pages/ContactPage';
-import NotFoundPage from './pages/NotFoundPage';
-
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import { LanguageProvider } from './contexts/LanguageContext';
+import './App.css';
 
 function App() {
+  const [defenceAuthenticated, setDefenceAuthenticated] = useState(false);
+  const [certArmyAuthenticated, setCertArmyAuthenticated] = useState(false);
+
+  const handleDefenceLogin = () => {
+    setDefenceAuthenticated(true);
+  };
+
+  const handleCertArmyLogin = () => {
+    setCertArmyAuthenticated(true);
+  };
+
+  const handleDefenceLogout = () => {
+    setDefenceAuthenticated(false);
+  };
+
+  const handleCertArmyLogout = () => {
+    setCertArmyAuthenticated(false);
+  };
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <Router>
-            <div className="min-h-screen bg-defence-gray-50">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/cyber-awareness" element={<CyberAwarenessPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                
-                {/* Protected Routes */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <DashboardPage />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/incident-report" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <IncidentReportPage />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/incident/:id" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <IncidentDetailsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/admin" element={
-                  <ProtectedRoute requiredRole="admin">
-                    <Layout>
-                      <AdminDashboardPage />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ProfilePage />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                
-                {/* Catch all route */}
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-              
-              {/* Global Toast Notifications */}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#1f2937',
-                    color: '#f9fafb',
-                  },
-                }}
-              />
-            </div>
-          </Router>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <Router>
+        <div className="App">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          
+          {/* Defence Personnel Routes */}
+          <Route 
+            path="/login" 
+            element={
+              defenceAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <DemoGovernmentLogin onLogin={handleDefenceLogin} />
+              )
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              defenceAuthenticated ? (
+                <ComprehensiveDefenceDashboard onLogout={handleDefenceLogout} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          
+          {/* CERT Army Routes */}
+          <Route 
+            path="/cert-army" 
+            element={
+              certArmyAuthenticated ? (
+                <Navigate to="/cert-army/dashboard" replace />
+              ) : (
+                <GovernmentCertLogin onLogin={handleCertArmyLogin} />
+              )
+            } 
+          />
+          <Route 
+            path="/cert-army/dashboard" 
+            element={
+              certArmyAuthenticated ? (
+                <EnhancedCertArmyDashboard onLogout={handleCertArmyLogout} />
+              ) : (
+                <Navigate to="/cert-army" replace />
+              )
+            } 
+          />
+          
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        </div>
+      </Router>
+    </LanguageProvider>
   );
 }
 
