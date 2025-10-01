@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, User, Lock, Eye, EyeOff, Smartphone, AlertTriangle, 
   CheckCircle, Clock, Activity, Globe, Radar, Brain, FileText,
-  Phone, Mail, Info, Zap, Target, Database
+  Phone, Mail, Info, Zap, Target, Database, Bell, X, 
+  ExternalLink, Users, Server, Wifi
 } from 'lucide-react';
 
 interface GovernmentCertLoginProps {
@@ -19,6 +20,16 @@ const GovernmentCertLogin: React.FC<GovernmentCertLoginProps> = ({ onLogin }) =>
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{
+    id: number;
+    type: 'critical' | 'warning' | 'info' | 'success';
+    title: string;
+    message: string;
+    timestamp: Date;
+    read: boolean;
+    action?: string;
+  }>>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [systemStatus, setSystemStatus] = useState({
     threatLevel: 'MODERATE',
     activeIncidents: 23,
@@ -39,6 +50,133 @@ const GovernmentCertLogin: React.FC<GovernmentCertLoginProps> = ({ onLogin }) =>
 
     return () => clearInterval(interval);
   }, []);
+
+  // Real-time notification system
+  useEffect(() => {
+    // Initial notifications
+    const initialNotifications = [
+      {
+        id: 1,
+        type: 'critical' as const,
+        title: 'Critical Threat Detected',
+        message: 'Advanced Persistent Threat targeting defence infrastructure. Immediate action required.',
+        timestamp: new Date(Date.now() - 5 * 60 * 1000),
+        read: false,
+        action: 'View Details'
+      },
+      {
+        id: 2,
+        type: 'warning' as const,
+        title: 'System Maintenance Scheduled',
+        message: 'Scheduled maintenance window: 02:00 - 04:00 IST tomorrow.',
+        timestamp: new Date(Date.now() - 15 * 60 * 1000),
+        read: false,
+        action: 'Acknowledge'
+      },
+      {
+        id: 3,
+        type: 'info' as const,
+        title: 'New Threat Intelligence',
+        message: 'Updated IOCs available for malware family "DarkHalo".',
+        timestamp: new Date(Date.now() - 30 * 60 * 1000),
+        read: true,
+        action: 'Download'
+      },
+      {
+        id: 4,
+        type: 'success' as const,
+        title: 'Incident Resolved',
+        message: 'Phishing campaign INC-2025-0930-001 successfully mitigated.',
+        timestamp: new Date(Date.now() - 45 * 60 * 1000),
+        read: true
+      }
+    ];
+    
+    setNotifications(initialNotifications);
+
+    // Simulate real-time notifications
+    const notificationInterval = setInterval(() => {
+      const newNotifications = [
+        {
+          type: 'critical' as const,
+          title: 'Zero-Day Exploit Detected',
+          message: 'New zero-day vulnerability being exploited in the wild. CVE-2025-XXXX assigned.',
+          action: 'Investigate'
+        },
+        {
+          type: 'warning' as const,
+          title: 'Unusual Network Activity',
+          message: 'Anomalous traffic patterns detected from external IP ranges.',
+          action: 'Monitor'
+        },
+        {
+          type: 'info' as const,
+          title: 'Threat Feed Update',
+          message: 'New indicators of compromise added to threat intelligence database.',
+          action: 'Review'
+        },
+        {
+          type: 'success' as const,
+          title: 'Security Patch Applied',
+          message: 'Critical security updates successfully deployed across all systems.'
+        },
+        {
+          type: 'critical' as const,
+          title: 'Ransomware Activity',
+          message: 'Ransomware group "DarkSide" targeting defence contractors globally.',
+          action: 'Alert Teams'
+        }
+      ];
+
+      if (Math.random() < 0.3) { // 30% chance every interval
+        const randomNotification = newNotifications[Math.floor(Math.random() * newNotifications.length)];
+        const newNotification = {
+          id: Date.now(),
+          ...randomNotification,
+          timestamp: new Date(),
+          read: false
+        };
+
+        setNotifications(prev => [newNotification, ...prev.slice(0, 9)]); // Keep only 10 notifications
+      }
+    }, 45000); // Every 45 seconds
+
+    return () => clearInterval(notificationInterval);
+  }, []);
+
+  const markAsRead = (id: number) => {
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+  };
+
+  const dismissNotification = (id: number) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'critical': return <Zap className="w-5 h-5 text-red-400" />;
+      case 'warning': return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
+      case 'info': return <Info className="w-5 h-5 text-blue-400" />;
+      case 'success': return <CheckCircle className="w-5 h-5 text-green-400" />;
+      default: return <Bell className="w-5 h-5 text-gray-400" />;
+    }
+  };
+
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case 'critical': return 'border-red-500/50 bg-red-500/10';
+      case 'warning': return 'border-yellow-500/50 bg-yellow-500/10';
+      case 'info': return 'border-blue-500/50 bg-blue-500/10';
+      case 'success': return 'border-green-500/50 bg-green-500/10';
+      default: return 'border-gray-500/50 bg-gray-500/10';
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -86,6 +224,144 @@ const GovernmentCertLogin: React.FC<GovernmentCertLoginProps> = ({ onLogin }) =>
               </div>
             </div>
             <div className="flex items-center space-x-6">
+              {/* Notification Bell */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-slate-300 hover:text-white transition-colors"
+                >
+                  <Bell className="w-6 h-6" />
+                  {unreadCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </motion.span>
+                  )}
+                </button>
+
+                {/* Notification Dropdown */}
+                <AnimatePresence>
+                  {showNotifications && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute right-0 top-full mt-2 w-96 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 max-h-96 overflow-hidden"
+                    >
+                      <div className="bg-slate-700 px-4 py-3 border-b border-slate-600">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-white font-semibold">Notifications</h3>
+                          <button
+                            onClick={() => setShowNotifications(false)}
+                            className="text-slate-400 hover:text-white"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                        {unreadCount > 0 && (
+                          <p className="text-sm text-slate-300 mt-1">
+                            {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="p-4 text-center text-slate-400">
+                            <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p>No notifications</p>
+                          </div>
+                        ) : (
+                          notifications.map((notification) => (
+                            <motion.div
+                              key={notification.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className={`p-4 border-b border-slate-700 hover:bg-slate-700/50 transition-colors ${
+                                !notification.read ? 'bg-slate-700/30' : ''
+                              }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className="flex-shrink-0 mt-1">
+                                  {getNotificationIcon(notification.type)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <h4 className={`text-sm font-medium ${
+                                      !notification.read ? 'text-white' : 'text-slate-300'
+                                    }`}>
+                                      {notification.title}
+                                    </h4>
+                                    {!notification.read && (
+                                      <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></div>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-2">
+                                    {notification.message}
+                                  </p>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs text-slate-500">
+                                      {notification.timestamp.toLocaleTimeString()}
+                                    </span>
+                                    <div className="flex items-center space-x-2">
+                                      {notification.action && (
+                                        <button
+                                          onClick={() => markAsRead(notification.id)}
+                                          className="text-xs text-blue-400 hover:text-blue-300 flex items-center"
+                                        >
+                                          {notification.action}
+                                          <ExternalLink className="w-3 h-3 ml-1" />
+                                        </button>
+                                      )}
+                                      {!notification.read && (
+                                        <button
+                                          onClick={() => markAsRead(notification.id)}
+                                          className="text-xs text-slate-400 hover:text-slate-300"
+                                        >
+                                          Mark read
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => dismissNotification(notification.id)}
+                                        className="text-xs text-slate-500 hover:text-slate-400"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))
+                        )}
+                      </div>
+
+                      {notifications.length > 0 && (
+                        <div className="bg-slate-700 px-4 py-3 border-t border-slate-600">
+                          <div className="flex items-center justify-between">
+                            <button
+                              onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                              className="text-sm text-blue-400 hover:text-blue-300"
+                            >
+                              Mark all as read
+                            </button>
+                            <button
+                              onClick={() => setNotifications([])}
+                              className="text-sm text-slate-400 hover:text-slate-300"
+                            >
+                              Clear all
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <div className="text-right">
                 <div className="text-sm font-medium text-slate-300">System Status</div>
                 <div className="text-lg font-bold text-green-400">OPERATIONAL</div>

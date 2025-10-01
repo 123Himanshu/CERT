@@ -235,14 +235,15 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                 </div>
               </div>
 
-              {/* Notifications */}
+              {/* Static Notifications - Matching CERT Army UI */}
               <div className="relative">
-                <button className="p-2 text-slate-400 hover:text-slate-300 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
-                  <Bell className="h-6 w-6" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {dashboardStats.criticalAlerts}
-                  </span>
-                </button>
+                <div className="p-2 bg-slate-700 border border-slate-600 rounded cursor-pointer hover:bg-slate-600 transition-colors">
+                  <Bell className="h-5 w-5 text-slate-300" />
+                  {/* Static notification badge matching the image */}
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    3
+                  </div>
+                </div>
               </div>
 
               {/* User Menu */}
@@ -254,7 +255,7 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                     <div className="text-xs text-slate-400">Level 3 Clearance</div>
                   </div>
                 </button>
-                
+
                 {/* Dropdown Menu */}
                 <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
@@ -271,7 +272,7 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                       <span>Performance Metrics</span>
                     </button>
                     <hr className="my-1 border-slate-600" />
-                    <button 
+                    <button
                       onClick={onLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 flex items-center space-x-2"
                     >
@@ -282,13 +283,22 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                 </div>
               </div>
 
-              {/* Time Display */}
+              {/* Time Display - Matching CERT Army UI */}
               <div className="text-right">
-                <div className="text-lg font-mono text-blue-300">
-                  {currentTime.toLocaleTimeString()}
+                <div className="text-white font-mono text-sm">
+                  {currentTime.toLocaleTimeString('en-US', {
+                    hour12: true,
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })}
                 </div>
-                <div className="text-sm text-slate-400">
-                  {currentTime.toLocaleDateString()}
+                <div className="text-slate-400 text-xs">
+                  {currentTime.toLocaleDateString('en-US', {
+                    month: 'numeric',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
                 </div>
               </div>
             </div>
@@ -304,11 +314,10 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
               <button
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
-                className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeView === item.id
+                className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeView === item.id
                     ? 'border-teal-400 text-teal-400'
                     : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500'
-                }`}
+                  }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
@@ -339,9 +348,9 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
 
       {/* Enhanced Incident Details Modal */}
       {selectedIncident && (
-        <EnhancedIncidentModal 
-          incident={selectedIncident} 
-          onClose={() => setSelectedIncident(null)} 
+        <EnhancedIncidentModal
+          incident={selectedIncident}
+          onClose={() => setSelectedIncident(null)}
         />
       )}
     </div>
@@ -436,7 +445,7 @@ const OverviewSection: React.FC<{ incidents: any[]; predictions: any[] }> = ({ i
               <p className="text-sm text-slate-300 mb-3">Timeframe: {prediction.timeframe}</p>
               <div className="flex items-center justify-between">
                 <div className="flex-1 bg-slate-600 rounded-full h-2 mr-3">
-                  <div 
+                  <div
                     className="bg-purple-500 h-2 rounded-full"
                     style={{ width: `${prediction.confidence}%` }}
                   />
@@ -494,22 +503,20 @@ const IncidentsSection: React.FC<{ incidents: any[]; onSelectIncident: (incident
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                    incident.severity === 'Critical' ? 'bg-red-500 text-white' :
-                    incident.severity === 'High' ? 'bg-orange-500 text-white' :
-                    'bg-yellow-500 text-slate-900'
-                  }`}>
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${incident.severity === 'Critical' ? 'bg-red-500 text-white' :
+                      incident.severity === 'High' ? 'bg-orange-500 text-white' :
+                        'bg-yellow-500 text-slate-900'
+                    }`}>
                     {incident.type}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="w-16 h-2 bg-slate-600 rounded-full mr-2">
-                      <div 
-                        className={`h-2 rounded-full ${
-                          incident.riskScore > 80 ? 'bg-red-500' : 
-                          incident.riskScore > 60 ? 'bg-orange-500' : 'bg-green-500'
-                        }`}
+                      <div
+                        className={`h-2 rounded-full ${incident.riskScore > 80 ? 'bg-red-500' :
+                            incident.riskScore > 60 ? 'bg-orange-500' : 'bg-green-500'
+                          }`}
                         style={{ width: `${incident.riskScore}%` }}
                       />
                     </div>
@@ -619,7 +626,7 @@ const ThreatIntelSection: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-slate-400">Confidence:</span>
                     <div className="w-16 h-2 bg-slate-600 rounded-full">
-                      <div 
+                      <div
                         className="bg-amber-500 h-2 rounded-full"
                         style={{ width: `${intel.confidence}%` }}
                       />
@@ -654,10 +661,9 @@ const AIInsightsSection: React.FC<{ predictions: any[] }> = ({ predictions }) =>
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-semibold text-white">{prediction.type}</h4>
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className={`h-4 w-4 ${
-                    prediction.trend === 'increasing' ? 'text-red-400' :
-                    prediction.trend === 'decreasing' ? 'text-green-400' : 'text-yellow-400'
-                  }`} />
+                  <TrendingUp className={`h-4 w-4 ${prediction.trend === 'increasing' ? 'text-red-400' :
+                      prediction.trend === 'decreasing' ? 'text-green-400' : 'text-yellow-400'
+                    }`} />
                   <span className="text-sm text-slate-400">{prediction.trend}</span>
                 </div>
               </div>
@@ -695,7 +701,7 @@ const AIInsightsSection: React.FC<{ predictions: any[] }> = ({ predictions }) =>
               <span className="text-sm text-slate-400">Last 24h</span>
             </div>
           </div>
-          
+
           <div className="bg-slate-700/50 rounded-lg p-4">
             <h4 className="font-semibold text-white mb-2">Collective Alerts</h4>
             <p className="text-sm text-slate-300 mb-3">Sent proactive warnings to 1,247 users</p>
@@ -704,7 +710,7 @@ const AIInsightsSection: React.FC<{ predictions: any[] }> = ({ predictions }) =>
               <span className="text-sm text-slate-400">Real-time</span>
             </div>
           </div>
-          
+
           <div className="bg-slate-700/50 rounded-lg p-4">
             <h4 className="font-semibold text-white mb-2">Sandbox Quarantine</h4>
             <p className="text-sm text-slate-300 mb-3">Isolated 15 suspicious files for analysis</p>
@@ -721,79 +727,309 @@ const AIInsightsSection: React.FC<{ predictions: any[] }> = ({ predictions }) =>
 
 // Threat Heatmap Section Component
 const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData }) => {
+  const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
+  const [mapView, setMapView] = useState<'threats' | 'infrastructure' | 'response'>('threats');
+  const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
+
+  // Enhanced threat locations with realistic coordinates for Indian cities
+  const threatLocations = [
+    { id: 1, city: 'Mumbai', x: 25, y: 65, severity: 'critical', incidents: 847, type: 'Financial Sector Attack', lat: 19.0760, lng: 72.8777, population: '20.4M' },
+    { id: 2, city: 'Delhi', x: 35, y: 25, severity: 'high', incidents: 623, type: 'Government Infrastructure', lat: 28.7041, lng: 77.1025, population: '32.9M' },
+    { id: 3, city: 'Bangalore', x: 30, y: 75, severity: 'critical', incidents: 1205, type: 'Tech Hub Ransomware', lat: 12.9716, lng: 77.5946, population: '13.2M' },
+    { id: 4, city: 'Chennai', x: 40, y: 85, severity: 'medium', incidents: 342, type: 'Port Security Breach', lat: 13.0827, lng: 80.2707, population: '11.5M' },
+    { id: 5, city: 'Hyderabad', x: 40, y: 70, severity: 'high', incidents: 567, type: 'Pharma Data Theft', lat: 17.3850, lng: 78.4867, population: '10.5M' },
+    { id: 6, city: 'Pune', x: 28, y: 68, severity: 'medium', incidents: 289, type: 'Manufacturing Malware', lat: 18.5204, lng: 73.8567, population: '7.4M' },
+    { id: 7, city: 'Kolkata', x: 60, y: 45, severity: 'high', incidents: 445, type: 'Banking Trojans', lat: 22.5726, lng: 88.3639, population: '15.7M' },
+    { id: 8, city: 'Ahmedabad', x: 20, y: 45, severity: 'medium', incidents: 234, type: 'Chemical Plant Attack', lat: 23.0225, lng: 72.5714, population: '8.4M' },
+    { id: 9, city: 'Jaipur', x: 30, y: 35, severity: 'low', incidents: 156, type: 'Tourism Phishing', lat: 26.9124, lng: 75.7873, population: '3.9M' },
+    { id: 10, city: 'Kochi', x: 25, y: 85, severity: 'high', incidents: 378, type: 'Maritime Cyber Attack', lat: 9.9312, lng: 76.2673, population: '2.1M' },
+    { id: 11, city: 'Gurgaon', x: 36, y: 28, severity: 'critical', incidents: 692, type: 'Corporate Espionage', lat: 28.4595, lng: 77.0266, population: '1.1M' },
+    { id: 12, city: 'Noida', x: 38, y: 26, severity: 'high', incidents: 423, type: 'Software Piracy Ring', lat: 28.5355, lng: 77.3910, population: '0.6M' }
+  ];
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return { bg: 'bg-red-500', border: 'border-red-400', text: 'text-red-400', glow: 'shadow-red-400/50' };
+      case 'high': return { bg: 'bg-orange-500', border: 'border-orange-400', text: 'text-orange-400', glow: 'shadow-orange-400/50' };
+      case 'medium': return { bg: 'bg-yellow-500', border: 'border-yellow-400', text: 'text-yellow-400', glow: 'shadow-yellow-400/50' };
+      case 'low': return { bg: 'bg-green-500', border: 'border-green-400', text: 'text-green-400', glow: 'shadow-green-400/50' };
+      default: return { bg: 'bg-gray-500', border: 'border-gray-400', text: 'text-gray-400', glow: 'shadow-gray-400/50' };
+    }
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical': return <Zap className="w-3 h-3" />;
+      case 'high': return <AlertTriangle className="w-3 h-3" />;
+      case 'medium': return <Activity className="w-3 h-3" />;
+      case 'low': return <Shield className="w-3 h-3" />;
+      default: return <MapPin className="w-3 h-3" />;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Map Visualization */}
+      {/* Enhanced Map Visualization */}
       <div className="lg:col-span-2 bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            <Globe className="h-6 w-6 mr-3 text-green-300" />
-            India Threat Heatmap
-          </h2>
-        </div>
-        <div className="p-6">
-          <div className="relative bg-slate-700/50 rounded-lg p-4 h-96 overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-slate-400">
-                <Globe className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-semibold">Interactive Threat Map</p>
-                <p className="text-sm">Real-time incident visualization across India</p>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white flex items-center">
+              <Globe className="h-6 w-6 mr-3 text-green-300" />
+              India Cyber Threat Intelligence Map
+            </h2>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center text-xs text-slate-400">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                Live Monitoring
               </div>
             </div>
+          </div>
+          
+          {/* Map Controls */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex space-x-2">
+              {(['threats', 'infrastructure', 'response'] as const).map((view) => (
+                <button
+                  key={view}
+                  onClick={() => setMapView(view)}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    mapView === view 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                  }`}
+                >
+                  {view.charAt(0).toUpperCase() + view.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div className="flex space-x-2">
+              {(['1h', '24h', '7d', '30d'] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    timeRange === range 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="relative bg-slate-900/80 rounded-lg p-4 h-[500px] overflow-hidden border border-slate-600">
+            {/* Background Map */}
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+              style={{
+                backgroundImage: "url('/images/Scr.png')",
+                backgroundSize: 'cover'
+              }}
+            />
             
-            {/* Simulated hotspots */}
-            {heatmapData.map((hotspot, index) => (
-              <motion.div
-                key={hotspot.city}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: index * 0.2 }}
-                className={`absolute w-4 h-4 rounded-full border-2 border-white ${
-                  hotspot.severity === 'high' ? 'bg-red-400 shadow-red-400/50' :
-                  hotspot.severity === 'medium' ? 'bg-yellow-400 shadow-yellow-400/50' : 
-                  'bg-green-400 shadow-green-400/50'
-                } shadow-lg`}
-                style={{
-                  left: `${20 + index * 12}%`,
-                  top: `${30 + (index % 3) * 25}%`
-                }}
-              >
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-transparent to-slate-900/40" />
+            
+            {/* Scanning Animation */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-green-400/10 to-transparent"
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+            />
+
+            {/* Threat Location Markers */}
+            {threatLocations.map((location, index) => {
+              const colors = getSeverityColor(location.severity);
+              return (
                 <motion.div
-                  animate={{ scale: [1, 2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
-                  className={`absolute inset-0 rounded-full ${
-                    hotspot.severity === 'high' ? 'bg-red-400' :
-                    hotspot.severity === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
-                  } opacity-30`}
-                />
-              </motion.div>
-            ))}
+                  key={location.id}
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                  style={{ left: `${location.x}%`, top: `${location.y}%` }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  onClick={() => setSelectedHotspot(location)}
+                  whileHover={{ scale: 1.2 }}
+                >
+                  {/* Pulsing Ring */}
+                  <motion.div
+                    className={`absolute inset-0 rounded-full border-2 ${colors.border}`}
+                    animate={{
+                      scale: [1, 2.5, 1],
+                      opacity: [0.8, 0, 0.8],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: index * 0.2
+                    }}
+                    style={{ width: '24px', height: '24px', marginLeft: '-12px', marginTop: '-12px' }}
+                  />
+
+                  {/* Main Marker */}
+                  <div className={`w-6 h-6 rounded-full border-2 border-white ${colors.bg} ${colors.glow} shadow-lg flex items-center justify-center text-white relative z-10`}>
+                    {getSeverityIcon(location.severity)}
+                  </div>
+
+                  {/* Incident Count Badge */}
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {location.incidents > 999 ? '999+' : location.incidents}
+                  </div>
+
+                  {/* Tooltip */}
+                  {selectedHotspot?.id === location.id && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 z-50"
+                    >
+                      <div className="bg-slate-800 border border-slate-600 text-white text-xs rounded-lg px-4 py-3 whitespace-nowrap shadow-xl min-w-[200px]">
+                        <div className="font-bold text-green-400 mb-1">{location.city}</div>
+                        <div className="text-slate-300 mb-1">{location.type}</div>
+                        <div className={`font-semibold mb-2 ${colors.text}`}>
+                          {location.severity.toUpperCase()} THREAT
+                        </div>
+                        <div className="border-t border-slate-600 pt-2 space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Incidents:</span>
+                            <span className="text-red-400 font-bold">{location.incidents}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Population:</span>
+                            <span className="text-slate-300">{location.population}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Coordinates:</span>
+                            <span className="text-slate-300">{location.lat.toFixed(2)}, {location.lng.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
+
+            {/* Enhanced Legend */}
+            <div className="absolute bottom-4 left-4 bg-slate-800/90 backdrop-blur-sm border border-slate-600 rounded-lg p-4 text-white">
+              <h4 className="text-sm font-bold mb-3 text-green-400">Threat Classification</h4>
+              <div className="space-y-2 text-xs">
+                {[
+                  { level: 'critical', label: 'Critical', count: threatLocations.filter(t => t.severity === 'critical').length },
+                  { level: 'high', label: 'High', count: threatLocations.filter(t => t.severity === 'high').length },
+                  { level: 'medium', label: 'Medium', count: threatLocations.filter(t => t.severity === 'medium').length },
+                  { level: 'low', label: 'Low', count: threatLocations.filter(t => t.severity === 'low').length }
+                ].map(({ level, label, count }) => {
+                  const colors = getSeverityColor(level);
+                  return (
+                    <div key={level} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className={`w-3 h-3 ${colors.bg} rounded-full mr-2 border border-white`}></div>
+                        <span>{label}</span>
+                      </div>
+                      <span className="font-bold">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="border-t border-slate-600 mt-3 pt-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Total Incidents:</span>
+                  <span className="font-bold text-red-400">
+                    {threatLocations.reduce((sum, loc) => sum + loc.incidents, 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Real-time Status */}
+            <div className="absolute top-4 right-4 bg-slate-800/90 backdrop-blur-sm border border-slate-600 rounded-lg p-3 text-white">
+              <div className="flex items-center text-sm mb-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                <span className="font-semibold">Live Intelligence Feed</span>
+              </div>
+              <div className="text-xs text-slate-300 space-y-1">
+                <div>Last Update: {new Date().toLocaleTimeString()}</div>
+                <div>Active Monitoring: {threatLocations.length} Cities</div>
+                <div>Response Teams: 24/7 Active</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Hotspot Details */}
+      {/* Enhanced Hotspot Details */}
       <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
-          <h2 className="text-xl font-bold text-white">Incident Hotspots</h2>
+          <h2 className="text-xl font-bold text-white flex items-center">
+            <Target className="h-5 w-5 mr-2 text-red-400" />
+            Critical Incident Zones
+          </h2>
         </div>
-        <div className="p-6">
+        <div className="p-6 max-h-[500px] overflow-y-auto">
           <div className="space-y-3">
-            {heatmapData.map((hotspot) => (
-              <div key={hotspot.city} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    hotspot.severity === 'high' ? 'bg-red-400' :
-                    hotspot.severity === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
-                  }`} />
-                  <span className="text-slate-300 font-medium">{hotspot.city}</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-white font-bold">{hotspot.incidents}</div>
-                  <div className="text-xs text-slate-400">incidents</div>
-                </div>
-              </div>
-            ))}
+            {threatLocations
+              .sort((a, b) => b.incidents - a.incidents)
+              .map((location) => {
+                const colors = getSeverityColor(location.severity);
+                return (
+                  <motion.div
+                    key={location.id}
+                    className={`p-4 bg-slate-700/50 rounded-lg border border-slate-600 cursor-pointer transition-all hover:bg-slate-600/50 ${
+                      selectedHotspot?.id === location.id ? 'ring-2 ring-green-400' : ''
+                    }`}
+                    onClick={() => setSelectedHotspot(location)}
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-4 h-4 rounded-full ${colors.bg} border border-white flex items-center justify-center`}>
+                          {getSeverityIcon(location.severity)}
+                        </div>
+                        <div>
+                          <span className="text-white font-bold text-lg">{location.city}</span>
+                          <div className={`text-xs font-semibold ${colors.text} uppercase tracking-wide`}>
+                            {location.severity} Priority
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-red-400 font-bold text-xl">{location.incidents}</div>
+                        <div className="text-xs text-slate-400">incidents</div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-slate-300 mb-3">
+                      <div className="font-medium">{location.type}</div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        Population: {location.population} • Coordinates: {location.lat.toFixed(2)}, {location.lng.toFixed(2)}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex space-x-4">
+                        <span className="text-slate-400">
+                          <Clock className="w-3 h-3 inline mr-1" />
+                          Last 24h
+                        </span>
+                        <span className="text-slate-400">
+                          <Users className="w-3 h-3 inline mr-1" />
+                          {Math.floor(Math.random() * 50) + 10} affected
+                        </span>
+                      </div>
+                      <button className="text-green-400 hover:text-green-300 font-medium">
+                        View Details →
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
           </div>
         </div>
       </div>
@@ -819,7 +1055,7 @@ const EnhancedIncidentModal: React.FC<{ incident: any; onClose: () => void }> = 
             <X className="h-6 w-6" />
           </button>
         </div>
-        
+
         <div className="p-6 space-y-6">
           {/* Header Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
