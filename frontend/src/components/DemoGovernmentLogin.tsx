@@ -43,7 +43,7 @@ const DemoGovernmentLogin: React.FC<DemoGovernmentLoginProps> = ({ onLogin }) =>
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     setTimeout(() => {
       alert(`✅ Registration Successful!\n\nWelcome ${formData.name || 'Defence Personnel'}!\n\nYour Defence Portal account has been created.\n\nService Number: ${formData.serviceNumber || 'DEMO123'}\nRank: ${formData.rank || 'Major'}\nUnit: ${formData.unit || 'Demo Unit'}\n\nYou can now access:\n• Report cyber incidents\n• Voice complaint system\n• Real-time threat alerts\n• AI-powered protection\n\nRedirecting to dashboard...`);
       onLogin();
@@ -192,7 +192,7 @@ const DemoGovernmentLogin: React.FC<DemoGovernmentLoginProps> = ({ onLogin }) =>
                 <div>
                   <h4 className="text-sm font-medium text-green-900">Demo Mode Active</h4>
                   <p className="text-sm text-green-700 mt-1">
-                    This is a demonstration. You can fill any details or leave fields empty. 
+                    This is a demonstration. You can fill any details or leave fields empty.
                     Click "Complete Registration" to proceed to the dashboard.
                   </p>
                 </div>

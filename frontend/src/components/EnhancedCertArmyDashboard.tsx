@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, AlertTriangle, Users, FileText, Clock, MapPin, Target, CheckCircle, Globe, Brain, Radar,
-  Eye, Ban, ArrowUp, X, LogOut, Settings, User, Bell, Activity, TrendingUp, BarChart3, Zap
+  Eye, Ban, ArrowUp, X, LogOut, Settings, User, Bell, Activity, TrendingUp, BarChart3, Zap, Info
 } from 'lucide-react';
 
 interface EnhancedCertArmyDashboardProps {
@@ -15,6 +15,16 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
   const [defconLevel] = useState(3);
   const [activeView, setActiveView] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [toasts, setToasts] = useState<Array<{id: number, message: string, type: 'success' | 'error' | 'info' | 'warning'}>>([]);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 4000);
+  };
   const [dashboardStats, setDashboardStats] = useState({
     totalIncidents: 1247,
     criticalAlerts: 23,
@@ -48,9 +58,9 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
         criticalAlerts: Math.max(15, prev.criticalAlerts + Math.floor(Math.random() * 5) - 2),
         activeThreats: Math.max(100, prev.activeThreats + Math.floor(Math.random() * 10) - 5),
         resolvedToday: prev.resolvedToday + Math.floor(Math.random() * 2),
-        threatDetectionRate: Math.min(99.9, Math.max(90, prev.threatDetectionRate + (Math.random() - 0.5) * 0.5)),
-        systemUptime: Math.min(100, Math.max(95, prev.systemUptime + (Math.random() - 0.5) * 0.1)),
-        networkHealth: Math.min(100, Math.max(80, prev.networkHealth + (Math.random() - 0.5) * 2)),
+        threatDetectionRate: parseFloat(Math.min(99.9, Math.max(90, prev.threatDetectionRate + (Math.random() - 0.5) * 0.5)).toFixed(2)),
+        systemUptime: parseFloat(Math.min(100, Math.max(95, prev.systemUptime + (Math.random() - 0.5) * 0.1)).toFixed(2)),
+        networkHealth: parseFloat(Math.min(100, Math.max(80, prev.networkHealth + (Math.random() - 0.5) * 2)).toFixed(2)),
         aiClassifications: prev.aiClassifications + Math.floor(Math.random() * 5),
         collectiveAlerts: prev.collectiveAlerts + Math.floor(Math.random() * 3),
         sandboxAnalyses: prev.sandboxAnalyses + Math.floor(Math.random() * 4),
@@ -401,7 +411,7 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                 </div>
                 <div className="flex items-center space-x-2">
                   <Activity className="h-4 w-4 text-blue-400" />
-                  <span className="text-blue-400 font-medium text-sm">{dashboardStats.systemUptime}%</span>
+                  <span className="text-blue-400 font-medium text-sm">{dashboardStats.systemUptime.toFixed(2)}%</span>
                 </div>
               </div>
 
@@ -427,40 +437,17 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
               </div>
 
               {/* User Menu */}
-              <div className="relative group">
-                <button className="flex items-center space-x-3 p-2 text-slate-300 hover:text-white bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowProfileModal(true)}
+                  className="flex items-center space-x-3 p-2 text-slate-300 hover:text-white bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors"
+                >
                   <User className="h-6 w-6" />
                   <div className="text-left hidden sm:block">
                     <div className="text-sm font-medium">Analyst {analystName}</div>
                     <div className="text-xs text-slate-400">Level 3 Clearance</div>
                   </div>
                 </button>
-
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999]">
-                  <div className="py-2">
-                    <div className="px-4 py-2 border-b border-slate-600">
-                      <div className="text-sm font-medium text-white">Analyst Dashboard</div>
-                      <div className="text-xs text-slate-400">Session: {currentTime.toLocaleTimeString()}</div>
-                    </div>
-                    <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 flex items-center space-x-2">
-                      <Settings className="h-4 w-4" />
-                      <span>System Settings</span>
-                    </button>
-                    <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 flex items-center space-x-2">
-                      <Activity className="h-4 w-4" />
-                      <span>Performance Metrics</span>
-                    </button>
-                    <hr className="my-1 border-slate-600" />
-                    <button
-                      onClick={onLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 flex items-center space-x-2"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Secure Logout</span>
-                    </button>
-                  </div>
-                </div>
               </div>
 
               {/* Time Display - Matching CERT Army UI */}
@@ -508,21 +495,23 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
       </div>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-6 space-y-6">
-        {/* Enhanced Stats Overview */}
-        <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <StatCard title="Total Incidents" value={dashboardStats.totalIncidents} icon={FileText} color="blue" trend="+12%" />
-          <StatCard title="Critical Alerts" value={dashboardStats.criticalAlerts} icon={AlertTriangle} color="red" trend="+8%" />
-          <StatCard title="AI Classifications" value={dashboardStats.aiClassifications} icon={Brain} color="purple" trend="+15%" />
-          <StatCard title="Collective Alerts" value={dashboardStats.collectiveAlerts} icon={Bell} color="orange" trend="+23%" />
-          <StatCard title="Sandbox Analyses" value={dashboardStats.sandboxAnalyses} icon={Activity} color="green" trend="+18%" />
-          <StatCard title="Playbooks Applied" value={dashboardStats.mitigationPlaybooks} icon={CheckCircle} color="teal" trend="+7%" />
-        </section>
+        {/* Enhanced Stats Overview - Show for all sections except Threat Intel and AI Insights */}
+        {activeView !== 'threats' && activeView !== 'ai-insights' && (
+          <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <StatCard title="Total Incidents" value={dashboardStats.totalIncidents} icon={FileText} color="blue" trend="+12%" />
+            <StatCard title="Critical Alerts" value={dashboardStats.criticalAlerts} icon={AlertTriangle} color="red" trend="+8%" />
+            <StatCard title="AI Classifications" value={dashboardStats.aiClassifications} icon={Brain} color="purple" trend="+15%" />
+            <StatCard title="Collective Alerts" value={dashboardStats.collectiveAlerts} icon={Bell} color="orange" trend="+23%" />
+            <StatCard title="Sandbox Analyses" value={dashboardStats.sandboxAnalyses} icon={Activity} color="green" trend="+18%" />
+            <StatCard title="Playbooks Applied" value={dashboardStats.mitigationPlaybooks} icon={CheckCircle} color="teal" trend="+7%" />
+          </section>
+        )}
 
         {/* Main Content Based on Active View */}
         {activeView === 'overview' && <OverviewSection incidents={incidents} predictions={aiPredictions} />}
         {activeView === 'incidents' && <IncidentsSection incidents={incidents} onSelectIncident={setSelectedIncident} />}
         {activeView === 'threats' && <ThreatIntelSection />}
-        {activeView === 'ai-insights' && <AIInsightsSection predictions={aiPredictions} />}
+        {activeView === 'ai-insights' && <AIInsightsSection predictions={aiPredictions} showToast={showToast} />}
         {activeView === 'heatmap' && <ThreatHeatmapSection heatmapData={threatHeatmap} />}
       </main>
 
@@ -540,6 +529,43 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
           onClose={() => setShowNotifications(false)}
         />
       )}
+
+      {showProfileModal && (
+        <ProfileModal
+          analystName={analystName}
+          currentTime={currentTime}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={onLogout}
+        />
+      )}
+
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 300 }}
+              className={`p-4 rounded-lg shadow-lg max-w-sm border-l-4 ${
+                toast.type === 'success' ? 'bg-green-800 border-green-400 text-green-100' :
+                toast.type === 'error' ? 'bg-red-800 border-red-400 text-red-100' :
+                toast.type === 'warning' ? 'bg-orange-800 border-orange-400 text-orange-100' :
+                'bg-blue-800 border-blue-400 text-blue-100'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                {toast.type === 'success' && <CheckCircle className="h-5 w-5" />}
+                {toast.type === 'error' && <AlertTriangle className="h-5 w-5" />}
+                {toast.type === 'warning' && <AlertTriangle className="h-5 w-5" />}
+                {toast.type === 'info' && <Info className="h-5 w-5" />}
+                <span className="text-sm font-medium">{toast.message}</span>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
@@ -755,29 +781,110 @@ const ThreatIntelSection: React.FC = () => {
     {
       id: 1,
       type: 'Domain IOC',
-      indicator: 'army-pension-fake.com',
-      confidence: 95,
-      source: 'Collective Intelligence',
-      firstSeen: '2024-01-15',
-      category: 'Phishing'
+      indicator: 'army-pension-portal-update.tk',
+      confidence: 97,
+      source: 'CERT-Army Collective Intelligence',
+      firstSeen: '2024-01-15 14:32:00',
+      lastSeen: '2024-01-15 16:45:00',
+      category: 'Phishing',
+      severity: 'Critical',
+      description: 'Sophisticated phishing domain impersonating official Army Pension Portal',
+      iocs: ['185.220.101.42', 'SHA256: a1b2c3d4e5f6789...', 'pension-update@army-fake.com'],
+      tags: ['APT-29', 'Credential Harvesting', 'Defence Targeting'],
+      geolocation: 'Pakistan',
+      registrar: 'Freenom',
+      status: 'Active - Sinkholed',
+      mitigation: 'DNS Sinkholed, Email Filters Updated'
     },
     {
       id: 2,
       type: 'File Hash',
-      indicator: 'a1b2c3d4e5f6...',
-      confidence: 98,
-      source: 'Sandbox Analysis',
-      firstSeen: '2024-01-14',
-      category: 'Malware'
+      indicator: 'SHA256: 7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730',
+      confidence: 99,
+      source: 'Air Force Cyber Command',
+      firstSeen: '2024-01-13 11:20:00',
+      lastSeen: '2024-01-15 14:10:00',
+      category: 'Malware',
+      severity: 'Critical',
+      description: 'Advanced Android spyware targeting military personnel',
+      iocs: ['com.defence.newsapp', 'C2: 192.168.100.50', 'Cert: CN=DefenceNews'],
+      tags: ['Mobile Malware', 'Data Exfiltration', 'Privilege Escalation'],
+      geolocation: 'China',
+      fileType: 'Android APK (2.4 MB)',
+      status: 'Quarantined',
+      mitigation: 'App Store Removal, Device Scanning Initiated'
     },
     {
       id: 3,
       type: 'IP Address',
-      indicator: '192.168.100.45',
-      confidence: 87,
-      source: 'Network Monitoring',
-      firstSeen: '2024-01-13',
-      category: 'C&C Server'
+      indicator: '185.220.101.42',
+      confidence: 94,
+      source: 'Naval Command Threat Intel',
+      firstSeen: '2024-01-14 09:15:00',
+      lastSeen: '2024-01-15 18:22:00',
+      category: 'Command & Control',
+      severity: 'High',
+      description: 'C2 server hosting multiple defence-targeted campaigns',
+      iocs: ['army-pension-portal-update.tk', 'defence-news-app.apk', 'TCP:443'],
+      tags: ['Lazarus Group', 'Multi-Stage Attack', 'TLS Encryption'],
+      geolocation: 'North Korea (VPN Exit)',
+      asn: 'AS13335 Cloudflare',
+      status: 'Monitored',
+      mitigation: 'Traffic Blocked, Honeypot Deployed'
+    },
+    {
+      id: 4,
+      type: 'Email IOC',
+      indicator: 'pension-verification@army-portal.org',
+      confidence: 91,
+      source: 'Army Cyber Security Cell',
+      firstSeen: '2024-01-12 16:45:00',
+      lastSeen: '2024-01-15 12:30:00',
+      category: 'Phishing',
+      severity: 'High',
+      description: 'Spoofed email address used in pension fraud campaign',
+      iocs: ['DKIM-Signature: fake', 'Return-Path: bounce@malicious.com', 'X-Originating-IP: 203.0.113.42'],
+      tags: ['Email Spoofing', 'Social Engineering', 'Financial Fraud'],
+      geolocation: 'Bangladesh',
+      emailProvider: 'Compromised SMTP',
+      status: 'Blocked',
+      mitigation: 'Email Gateway Rules Updated, User Awareness Sent'
+    },
+    {
+      id: 5,
+      type: 'URL IOC',
+      indicator: 'hxxps://secure-army-login[.]net/verify-account',
+      confidence: 96,
+      source: 'Joint Cyber Defence Centre',
+      firstSeen: '2024-01-11 08:30:00',
+      lastSeen: '2024-01-15 19:15:00',
+      category: 'Credential Harvesting',
+      severity: 'Critical',
+      description: 'Fake login portal collecting defence personnel credentials',
+      iocs: ['SSL Cert: Let\'s Encrypt', 'Hosting: 198.51.100.25', 'Redirect: telegram.me/leaked_data'],
+      tags: ['Credential Theft', 'SSL Abuse', 'Telegram Exfiltration'],
+      geolocation: 'Russia',
+      httpStatus: '200 OK',
+      status: 'Taken Down',
+      mitigation: 'Domain Seized, Hosting Provider Notified'
+    },
+    {
+      id: 6,
+      type: 'Certificate IOC',
+      indicator: 'CN=Indian Army Portal, O=Ministry of Defence, Serial: 7B:3F:2A:1C:8D:9E',
+      confidence: 93,
+      source: 'Cyber Crime Investigation Cell',
+      firstSeen: '2024-01-09 12:10:00',
+      lastSeen: '2024-01-15 08:20:00',
+      category: 'Certificate Abuse',
+      severity: 'High',
+      description: 'Fraudulent SSL certificate impersonating official defence portal',
+      iocs: ['Issuer: Fake CA Authority', 'Key Size: 2048 RSA', 'Validity: 365 days'],
+      tags: ['SSL Impersonation', 'Certificate Fraud', 'Man-in-the-Middle'],
+      geolocation: 'Unknown (Tor)',
+      issuer: 'Fraudulent CA',
+      status: 'Revoked',
+      mitigation: 'Certificate Blacklisted, CA Notified'
     }
   ];
 
@@ -793,32 +900,116 @@ const ThreatIntelSection: React.FC = () => {
         <div className="p-6">
           <div className="space-y-4">
             {threatIntel.map((intel) => (
-              <div key={intel.id} className="bg-slate-700/50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
+              <div key={intel.id} className="bg-slate-700/50 rounded-lg p-6 border border-slate-600/50">
+                {/* Header with Type, Category, and Severity */}
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <span className="bg-amber-500/20 text-amber-300 px-2 py-1 rounded text-xs">
+                    <span className="bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full text-xs font-medium">
                       {intel.type}
                     </span>
-                    <span className="bg-red-500/20 text-red-300 px-2 py-1 rounded text-xs">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      intel.severity === 'Critical' ? 'bg-red-500/20 text-red-300' :
+                      intel.severity === 'High' ? 'bg-orange-500/20 text-orange-300' :
+                      'bg-yellow-500/20 text-yellow-300'
+                    }`}>
+                      {intel.severity}
+                    </span>
+                    <span className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-medium">
                       {intel.category}
                     </span>
                   </div>
-                  <span className="text-sm text-slate-400">{intel.firstSeen}</span>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-400">First Seen</div>
+                    <div className="text-sm text-slate-300 font-mono">{intel.firstSeen}</div>
+                  </div>
                 </div>
-                <div className="font-mono text-white bg-slate-800 p-2 rounded mb-3">
-                  {intel.indicator}
+
+                {/* Indicator */}
+                <div className="mb-4">
+                  <div className="text-xs text-slate-400 mb-2">Indicator of Compromise</div>
+                  <div className="font-mono text-white bg-slate-800 p-3 rounded border border-slate-600 break-all">
+                    {intel.indicator}
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">Source: {intel.source}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-slate-400">Confidence:</span>
-                    <div className="w-16 h-2 bg-slate-600 rounded-full">
-                      <div
-                        className="bg-amber-500 h-2 rounded-full"
-                        style={{ width: `${intel.confidence}%` }}
-                      />
+
+                {/* Description */}
+                <div className="mb-4">
+                  <div className="text-sm text-slate-300 leading-relaxed">
+                    {intel.description}
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="mb-4">
+                  <div className="text-xs text-slate-400 mb-2">Threat Tags</div>
+                  <div className="flex flex-wrap gap-2">
+                    {intel.tags.map((tag, index) => (
+                      <span key={index} className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional IOCs */}
+                <div className="mb-4">
+                  <div className="text-xs text-slate-400 mb-2">Related IOCs</div>
+                  <div className="bg-slate-800/50 p-3 rounded border border-slate-600">
+                    {intel.iocs.map((ioc, index) => (
+                      <div key={index} className="font-mono text-xs text-slate-300 mb-1 last:mb-0">
+                        • {ioc}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-slate-800/50 p-3 rounded">
+                    <div className="text-xs text-slate-400">Source</div>
+                    <div className="text-sm text-slate-300 font-medium">{intel.source}</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-3 rounded">
+                    <div className="text-xs text-slate-400">Geolocation</div>
+                    <div className="text-sm text-slate-300 font-medium">{intel.geolocation}</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-3 rounded">
+                    <div className="text-xs text-slate-400">Status</div>
+                    <div className={`text-sm font-medium ${
+                      intel.status.includes('Active') ? 'text-red-300' :
+                      intel.status.includes('Blocked') || intel.status.includes('Taken Down') ? 'text-green-300' :
+                      'text-yellow-300'
+                    }`}>
+                      {intel.status}
                     </div>
-                    <span className="text-sm text-amber-300">{intel.confidence}%</span>
+                  </div>
+                </div>
+
+                {/* Mitigation */}
+                <div className="mb-4">
+                  <div className="text-xs text-slate-400 mb-2">Mitigation Actions</div>
+                  <div className="bg-green-500/10 border border-green-500/30 p-3 rounded">
+                    <div className="text-sm text-green-300">{intel.mitigation}</div>
+                  </div>
+                </div>
+
+                {/* Footer with Confidence and Timeline */}
+                <div className="flex items-center justify-between pt-4 border-t border-slate-600">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-slate-400">Confidence:</span>
+                      <div className="w-20 h-2 bg-slate-600 rounded-full">
+                        <div
+                          className="bg-amber-500 h-2 rounded-full"
+                          style={{ width: `${intel.confidence}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-amber-300 font-medium">{intel.confidence}%</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-400">Last Seen</div>
+                    <div className="text-sm text-slate-300 font-mono">{intel.lastSeen}</div>
                   </div>
                 </div>
               </div>
@@ -830,80 +1021,300 @@ const ThreatIntelSection: React.FC = () => {
   );
 };
 
-// AI Insights Section Component
-const AIInsightsSection: React.FC<{ predictions: any[] }> = ({ predictions }) => {
+// Enhanced AI Insights Section Component with Real-time Data
+const AIInsightsSection: React.FC<{ 
+  predictions: any[]; 
+  showToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
+}> = ({ predictions, showToast }) => {
+  const [aiMetrics, setAiMetrics] = useState({
+    modelsRunning: 12,
+    predictionsGenerated: 1847,
+    threatsDetected: 156,
+    falsePositives: 23,
+    accuracy: 94.7,
+    processingSpeed: 2.3,
+    dataProcessed: 847.2,
+    alertsGenerated: 89
+  });
+
+  const [realtimeActivity, setRealtimeActivity] = useState([
+    { id: 1, time: new Date().toLocaleTimeString(), action: 'Threat pattern detected', model: 'DeepThreat-v3', confidence: 97.3 },
+    { id: 2, time: new Date(Date.now() - 30000).toLocaleTimeString(), action: 'Anomaly classification complete', model: 'AnomalyNet-v2', confidence: 89.1 },
+    { id: 3, time: new Date(Date.now() - 60000).toLocaleTimeString(), action: 'Behavioral analysis updated', model: 'BehaviorAI-v4', confidence: 92.8 }
+  ]);
+
+  // Real-time AI metrics updates
+  React.useEffect(() => {
+    const updateMetrics = () => {
+      setAiMetrics(prev => ({
+        ...prev,
+        predictionsGenerated: prev.predictionsGenerated + Math.floor(Math.random() * 5),
+        threatsDetected: prev.threatsDetected + Math.floor(Math.random() * 2),
+        accuracy: parseFloat(Math.min(99.9, Math.max(90, prev.accuracy + (Math.random() - 0.5) * 0.3)).toFixed(2)),
+        processingSpeed: parseFloat(Math.max(1.0, prev.processingSpeed + (Math.random() - 0.5) * 0.2).toFixed(1)),
+        dataProcessed: parseFloat((prev.dataProcessed + Math.random() * 10).toFixed(1)),
+        alertsGenerated: prev.alertsGenerated + Math.floor(Math.random() * 3)
+      }));
+
+      // Add new real-time activity
+      const activities = [
+        'Neural network training completed',
+        'Threat vector analysis updated',
+        'Predictive model recalibrated',
+        'Anomaly detection enhanced',
+        'Pattern recognition improved',
+        'Behavioral baseline updated',
+        'Risk assessment completed',
+        'Threat intelligence correlated'
+      ];
+
+      const models = ['DeepThreat-v3', 'AnomalyNet-v2', 'BehaviorAI-v4', 'ThreatNet-v5', 'CyberML-v3'];
+      
+      const newActivity = {
+        id: Date.now(),
+        time: new Date().toLocaleTimeString(),
+        action: activities[Math.floor(Math.random() * activities.length)],
+        model: models[Math.floor(Math.random() * models.length)],
+        confidence: parseFloat((85 + Math.random() * 14).toFixed(1))
+      };
+
+      setRealtimeActivity(prev => [newActivity, ...prev.slice(0, 9)]);
+
+      // Trigger toast notifications for significant AI events
+      if (Math.random() < 0.3) { // 30% chance of toast notification
+        const toastMessages = [
+          { message: `AI Model ${newActivity.model} detected new threat pattern`, type: 'warning' as const },
+          { message: `Threat prediction accuracy improved to ${newActivity.confidence}%`, type: 'success' as const },
+          { message: `Neural network training completed successfully`, type: 'info' as const },
+          { message: `Anomaly detection threshold exceeded - investigating`, type: 'warning' as const },
+          { message: `AI system automatically blocked ${Math.floor(Math.random() * 10) + 1} malicious domains`, type: 'success' as const }
+        ];
+        
+        const randomToast = toastMessages[Math.floor(Math.random() * toastMessages.length)];
+        showToast(randomToast.message, randomToast.type);
+      }
+    };
+
+    const interval = setInterval(updateMetrics, 8000); // Update every 8 seconds
+    return () => clearInterval(interval);
+  }, [showToast]);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Predictions */}
-      <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            <Brain className="h-6 w-6 mr-3 text-purple-400" />
-            AI Threat Forecasting
-          </h2>
+    <div className="space-y-6">
+      {/* AI System Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <Brain className="h-6 w-6 text-purple-400" />
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          </div>
+          <div className="text-2xl font-bold text-white">{aiMetrics.modelsRunning}</div>
+          <div className="text-sm text-slate-400">AI Models Active</div>
         </div>
-        <div className="p-6 space-y-4">
-          {predictions.map((prediction, index) => (
-            <div key={index} className="bg-slate-700/50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold text-white">{prediction.type}</h4>
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className={`h-4 w-4 ${prediction.trend === 'increasing' ? 'text-red-400' :
-                    prediction.trend === 'decreasing' ? 'text-green-400' : 'text-yellow-400'
-                    }`} />
-                  <span className="text-sm text-slate-400">{prediction.trend}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-3">
-                <div>
-                  <span className="text-xs text-slate-400">Probability</span>
-                  <div className="text-lg font-bold text-purple-400">{prediction.probability}%</div>
-                </div>
-                <div>
-                  <span className="text-xs text-slate-400">Confidence</span>
-                  <div className="text-lg font-bold text-blue-400">{prediction.confidence}%</div>
-                </div>
-              </div>
-              <p className="text-sm text-slate-300 mb-2">Target: {prediction.target}</p>
-              <p className="text-sm text-slate-300">Timeframe: {prediction.timeframe}</p>
-            </div>
-          ))}
+
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <Activity className="h-6 w-6 text-blue-400" />
+            <div className="text-xs text-green-400">+{Math.floor(Math.random() * 10)}</div>
+          </div>
+          <div className="text-2xl font-bold text-white">{aiMetrics.predictionsGenerated.toLocaleString()}</div>
+          <div className="text-sm text-slate-400">Predictions Generated</div>
+        </div>
+
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <Target className="h-6 w-6 text-red-400" />
+            <div className="text-xs text-red-400">+{Math.floor(Math.random() * 3)}</div>
+          </div>
+          <div className="text-2xl font-bold text-white">{aiMetrics.threatsDetected}</div>
+          <div className="text-sm text-slate-400">Threats Detected</div>
+        </div>
+
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <CheckCircle className="h-6 w-6 text-green-400" />
+            <div className="text-xs text-green-400">{aiMetrics.accuracy}%</div>
+          </div>
+          <div className="text-2xl font-bold text-white">{aiMetrics.accuracy}%</div>
+          <div className="text-sm text-slate-400">Model Accuracy</div>
         </div>
       </div>
 
-      {/* Mitigation Recommendations */}
-      <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            <CheckCircle className="h-6 w-6 mr-3 text-green-400" />
-            Automated Mitigations
-          </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Real-time AI Activity Feed */}
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
+            <h2 className="text-xl font-bold text-white flex items-center">
+              <Zap className="h-6 w-6 mr-3 text-yellow-400" />
+              Live AI Processing
+            </h2>
+          </div>
+          <div className="p-6 max-h-96 overflow-y-auto">
+            <div className="space-y-3">
+              {realtimeActivity.map((activity) => (
+                <motion.div
+                  key={activity.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-slate-700/50 rounded-lg p-3 border-l-4 border-yellow-400"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">{activity.action}</span>
+                    <span className="text-xs text-slate-400">{activity.time}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-blue-300">{activity.model}</span>
+                    <span className="text-xs text-green-400">{activity.confidence}% confidence</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="bg-slate-700/50 rounded-lg p-4">
-            <h4 className="font-semibold text-white mb-2">Domain Blocking</h4>
-            <p className="text-sm text-slate-300 mb-3">Automatically blocked 23 malicious domains</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">Active</span>
-              <span className="text-sm text-slate-400">Last 24h</span>
-            </div>
-          </div>
 
-          <div className="bg-slate-700/50 rounded-lg p-4">
-            <h4 className="font-semibold text-white mb-2">Collective Alerts</h4>
-            <p className="text-sm text-slate-300 mb-3">Sent proactive warnings to 1,247 users</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded">Ongoing</span>
-              <span className="text-sm text-slate-400">Real-time</span>
-            </div>
+        {/* Enhanced Threat Predictions */}
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
+            <h2 className="text-xl font-bold text-white flex items-center">
+              <Brain className="h-6 w-6 mr-3 text-purple-400" />
+              AI Threat Forecasting
+            </h2>
           </div>
+          <div className="p-6 space-y-4">
+            {predictions.map((prediction, index) => (
+              <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-white">{prediction.type}</h4>
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className={`h-4 w-4 ${prediction.trend === 'increasing' ? 'text-red-400' :
+                      prediction.trend === 'decreasing' ? 'text-green-400' : 'text-yellow-400'
+                      }`} />
+                    <span className="text-sm text-slate-400">{prediction.trend}</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div>
+                    <span className="text-xs text-slate-400">Probability</span>
+                    <div className="text-lg font-bold text-purple-400">{prediction.probability}%</div>
+                    <div className="w-full bg-slate-600 rounded-full h-2 mt-1">
+                      <div 
+                        className="bg-purple-500 h-2 rounded-full" 
+                        style={{ width: `${prediction.probability}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400">AI Confidence</span>
+                    <div className="text-lg font-bold text-blue-400">{prediction.confidence}%</div>
+                    <div className="w-full bg-slate-600 rounded-full h-2 mt-1">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full" 
+                        style={{ width: `${prediction.confidence}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-sm text-slate-300">
+                    <span className="text-slate-400">Target:</span> {prediction.target}
+                  </p>
+                  <p className="text-sm text-slate-300">
+                    <span className="text-slate-400">Timeframe:</span> {prediction.timeframe}
+                  </p>
+                  <div className="flex items-center space-x-2 mt-3">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      prediction.probability > 80 ? 'bg-red-500/20 text-red-300' :
+                      prediction.probability > 60 ? 'bg-orange-500/20 text-orange-300' :
+                      'bg-yellow-500/20 text-yellow-300'
+                    }`}>
+                      {prediction.probability > 80 ? 'High Risk' : prediction.probability > 60 ? 'Medium Risk' : 'Low Risk'}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      Model: ThreatNet-v5
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-          <div className="bg-slate-700/50 rounded-lg p-4">
-            <h4 className="font-semibold text-white mb-2">Sandbox Quarantine</h4>
-            <p className="text-sm text-slate-300 mb-3">Isolated 15 suspicious files for analysis</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">Processing</span>
-              <span className="text-sm text-slate-400">In progress</span>
+        {/* AI Performance Metrics */}
+        <div className="bg-slate-800/70 backdrop-blur-sm border border-slate-600 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-600 bg-slate-700/50">
+            <h2 className="text-xl font-bold text-white flex items-center">
+              <BarChart3 className="h-6 w-6 mr-3 text-green-400" />
+              Performance Metrics
+            </h2>
+          </div>
+          <div className="p-6 space-y-6">
+            {/* Processing Speed */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-slate-400">Processing Speed</span>
+                <span className="text-sm font-medium text-green-400">{aiMetrics.processingSpeed}s avg</span>
+              </div>
+              <div className="w-full bg-slate-600 rounded-full h-3">
+                <div 
+                  className="bg-green-500 h-3 rounded-full transition-all duration-1000" 
+                  style={{ width: `${Math.min(100, (5 - aiMetrics.processingSpeed) * 20)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Data Processed */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-slate-400">Data Processed</span>
+                <span className="text-sm font-medium text-blue-400">{aiMetrics.dataProcessed} GB</span>
+              </div>
+              <div className="w-full bg-slate-600 rounded-full h-3">
+                <div 
+                  className="bg-blue-500 h-3 rounded-full transition-all duration-1000" 
+                  style={{ width: `${Math.min(100, (aiMetrics.dataProcessed / 1000) * 100)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* False Positive Rate */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-slate-400">False Positives</span>
+                <span className="text-sm font-medium text-orange-400">{aiMetrics.falsePositives}</span>
+              </div>
+              <div className="w-full bg-slate-600 rounded-full h-3">
+                <div 
+                  className="bg-orange-500 h-3 rounded-full" 
+                  style={{ width: `${Math.min(100, (aiMetrics.falsePositives / 100) * 100)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Model Status */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-slate-300">Active AI Models</h4>
+              {[
+                { name: 'DeepThreat-v3', status: 'Training', accuracy: 97.2 },
+                { name: 'AnomalyNet-v2', status: 'Active', accuracy: 94.8 },
+                { name: 'BehaviorAI-v4', status: 'Learning', accuracy: 91.5 },
+                { name: 'ThreatNet-v5', status: 'Active', accuracy: 96.1 }
+              ].map((model, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-slate-700/50 rounded">
+                  <div>
+                    <div className="text-sm font-medium text-white">{model.name}</div>
+                    <div className="text-xs text-slate-400">{model.accuracy}% accuracy</div>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    model.status === 'Active' ? 'bg-green-500/20 text-green-300' :
+                    model.status === 'Training' ? 'bg-blue-500/20 text-blue-300' :
+                    'bg-orange-500/20 text-orange-300'
+                  }`}>
+                    {model.status}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -980,8 +1391,8 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                   key={view}
                   onClick={() => setMapView(view)}
                   className={`px-3 py-1 text-xs rounded-full transition-colors ${mapView === view
-                      ? 'bg-green-500 text-white'
-                      : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
                     }`}
                 >
                   {view.charAt(0).toUpperCase() + view.slice(1)}
@@ -994,8 +1405,8 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                   key={range}
                   onClick={() => setTimeRange(range)}
                   className={`px-2 py-1 text-xs rounded transition-colors ${timeRange === range
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
                     }`}
                 >
                   {range}
@@ -1409,8 +1820,8 @@ const NotificationsModal: React.FC<{
                       </span>
                       <div className="flex items-center space-x-2">
                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${notification.priority === 'high' ? 'bg-red-500/20 text-red-300' :
-                            notification.priority === 'medium' ? 'bg-orange-500/20 text-orange-300' :
-                              'bg-green-500/20 text-green-300'
+                          notification.priority === 'medium' ? 'bg-orange-500/20 text-orange-300' :
+                            'bg-green-500/20 text-green-300'
                           }`}>
                           {notification.priority.toUpperCase()}
                         </span>
@@ -1434,6 +1845,186 @@ const NotificationsModal: React.FC<{
             <button className="text-sm text-slate-500 hover:text-slate-400">
               Clear all notifications
             </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// Profile Modal Component
+const ProfileModal: React.FC<{
+  analystName: string;
+  currentTime: Date;
+  onClose: () => void;
+  onLogout: () => void;
+}> = ({ analystName, currentTime, onClose, onLogout }) => {
+  const sessionStart = new Date(Date.now() - Math.random() * 3600000); // Random session start time
+  const sessionDuration = Math.floor((Date.now() - sessionStart.getTime()) / 1000 / 60); // Minutes
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full border border-slate-600"
+      >
+        {/* Header */}
+        <div className="px-8 py-6 border-b border-slate-600 bg-gradient-to-r from-slate-700 to-slate-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="bg-teal-500 p-2 rounded-lg">
+                <User className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-100">Analyst Profile</h2>
+                <p className="text-sm text-slate-400">CERT-Army Command Center</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Profile Information - Landscape Layout */}
+        <div className="p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Profile & Session Info */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Analyst Details */}
+              <div className="bg-slate-700/50 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold text-slate-100 mb-4 flex items-center">
+                  <Shield className="h-6 w-6 mr-3 text-teal-400" />
+                  Analyst Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Analyst ID:</span>
+                      <span className="text-slate-100 font-medium">{analystName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Security Clearance:</span>
+                      <span className="text-green-400 font-medium">Level 3 - CLASSIFIED</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Department:</span>
+                      <span className="text-slate-100">Cyber Threat Intelligence</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Role:</span>
+                      <span className="text-slate-100">Senior Threat Analyst</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Session & System Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Session Information */}
+                <div className="bg-blue-500/10 p-6 rounded-lg border border-blue-500/20">
+                  <h3 className="text-lg font-semibold text-slate-100 mb-4 flex items-center">
+                    <Clock className="h-5 w-5 mr-2 text-blue-400" />
+                    Session Details
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Current Time:</span>
+                      <span className="text-slate-100 font-mono text-sm">{currentTime.toLocaleTimeString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Session Start:</span>
+                      <span className="text-slate-100 font-mono text-sm">{sessionStart.toLocaleTimeString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Duration:</span>
+                      <span className="text-green-400 font-medium">{sessionDuration} min</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Status:</span>
+                      <span className="text-green-400 font-medium flex items-center">
+                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* System Access */}
+                <div className="bg-purple-500/10 p-6 rounded-lg border border-purple-500/20">
+                  <h3 className="text-lg font-semibold text-slate-100 mb-4 flex items-center">
+                    <Activity className="h-5 w-5 mr-2 text-purple-400" />
+                    System Access
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Access Level:</span>
+                      <span className="text-purple-400 font-medium text-sm">Full System</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Last Login:</span>
+                      <span className="text-slate-100 text-sm">{new Date(Date.now() - 86400000).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Failed Attempts:</span>
+                      <span className="text-green-400">0</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">IP Address:</span>
+                      <span className="text-slate-100 font-mono text-sm">192.168.1.100</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Action Buttons */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4 flex items-center">
+                <Settings className="h-5 w-5 mr-2 text-slate-400" />
+                Quick Actions
+              </h3>
+              
+              <button className="w-full flex items-center space-x-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors">
+                <Settings className="h-5 w-5" />
+                <span>System Settings</span>
+              </button>
+              
+              <button className="w-full flex items-center space-x-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors">
+                <Activity className="h-5 w-5" />
+                <span>Performance Metrics</span>
+              </button>
+
+              <button className="w-full flex items-center space-x-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors">
+                <FileText className="h-5 w-5" />
+                <span>Activity Log</span>
+              </button>
+
+              <button className="w-full flex items-center space-x-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors">
+                <User className="h-5 w-5" />
+                <span>Profile Settings</span>
+              </button>
+
+              <hr className="border-slate-600 my-4" />
+
+              <button
+                onClick={() => {
+                  onLogout();
+                  onClose();
+                }}
+                className="w-full flex items-center justify-center space-x-3 px-4 py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Secure Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
