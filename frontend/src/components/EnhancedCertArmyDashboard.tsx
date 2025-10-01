@@ -14,14 +14,8 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
   const [currentTime, setCurrentTime] = useState(new Date());
   const [defconLevel] = useState(3);
   const [activeView, setActiveView] = useState('overview');
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Enhanced dashboard statistics
-  const dashboardStats = {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState({
     totalIncidents: 1247,
     criticalAlerts: 23,
     activeThreats: 156,
@@ -34,9 +28,117 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
     collectiveAlerts: 89,
     sandboxAnalyses: 234,
     mitigationPlaybooks: 45
-  };
+  });
 
-  // Enhanced incident data with all PS features
+  // Get user info from localStorage
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const analystName = userInfo.analystId || 'CERT-001';
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Real-time dashboard updates
+  useEffect(() => {
+    const updateStats = () => {
+      setDashboardStats(prev => ({
+        ...prev,
+        totalIncidents: prev.totalIncidents + Math.floor(Math.random() * 3),
+        criticalAlerts: Math.max(15, prev.criticalAlerts + Math.floor(Math.random() * 5) - 2),
+        activeThreats: Math.max(100, prev.activeThreats + Math.floor(Math.random() * 10) - 5),
+        resolvedToday: prev.resolvedToday + Math.floor(Math.random() * 2),
+        threatDetectionRate: Math.min(99.9, Math.max(90, prev.threatDetectionRate + (Math.random() - 0.5) * 0.5)),
+        systemUptime: Math.min(100, Math.max(95, prev.systemUptime + (Math.random() - 0.5) * 0.1)),
+        networkHealth: Math.min(100, Math.max(80, prev.networkHealth + (Math.random() - 0.5) * 2)),
+        aiClassifications: prev.aiClassifications + Math.floor(Math.random() * 5),
+        collectiveAlerts: prev.collectiveAlerts + Math.floor(Math.random() * 3),
+        sandboxAnalyses: prev.sandboxAnalyses + Math.floor(Math.random() * 4),
+        mitigationPlaybooks: prev.mitigationPlaybooks + Math.floor(Math.random() * 2)
+      }));
+    };
+
+    const interval = setInterval(updateStats, 5000); // Update every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Mock notifications data (8 notifications)
+  const notifications = [
+    {
+      id: 1,
+      type: 'critical',
+      title: 'Zero-Day Exploit Detected',
+      message: 'New zero-day vulnerability targeting defence infrastructure. Immediate action required.',
+      time: '2 minutes ago',
+      read: false,
+      priority: 'high'
+    },
+    {
+      id: 2,
+      type: 'alert',
+      title: 'APT Group Activity Surge',
+      message: 'Increased activity from known APT groups targeting military networks.',
+      time: '15 minutes ago',
+      read: false,
+      priority: 'high'
+    },
+    {
+      id: 3,
+      type: 'system',
+      title: 'AI Model Updated',
+      message: 'Threat detection AI model updated with latest intelligence patterns.',
+      time: '1 hour ago',
+      read: true,
+      priority: 'medium'
+    },
+    {
+      id: 4,
+      type: 'incident',
+      title: 'Phishing Campaign Blocked',
+      message: '1,247 phishing emails automatically quarantined across defence networks.',
+      time: '2 hours ago',
+      read: false,
+      priority: 'medium'
+    },
+    {
+      id: 5,
+      type: 'intelligence',
+      title: 'New IOCs Added',
+      message: '156 new Indicators of Compromise added to threat intelligence database.',
+      time: '4 hours ago',
+      read: true,
+      priority: 'low'
+    },
+    {
+      id: 6,
+      type: 'sandbox',
+      title: 'Malware Analysis Complete',
+      message: 'Sandbox analysis of suspicious file SHA256:a1b2c3... completed.',
+      time: '6 hours ago',
+      read: true,
+      priority: 'low'
+    },
+    {
+      id: 7,
+      type: 'collective',
+      title: 'Collective Defense Alert',
+      message: 'New threat pattern shared by Naval Command - protection updated.',
+      time: '8 hours ago',
+      read: false,
+      priority: 'medium'
+    },
+    {
+      id: 8,
+      type: 'maintenance',
+      title: 'System Maintenance Scheduled',
+      message: 'Scheduled maintenance window: 02:00 - 04:00 IST tomorrow.',
+      time: '1 day ago',
+      read: true,
+      priority: 'low'
+    }
+  ];
+
+  // Enhanced incident data with more critical incidents
   const incidents = [
     {
       id: 'INC-2024-001',
@@ -94,6 +196,82 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
       collectiveAlert: false,
       sandboxResults: 'Data exfiltration capabilities',
       threatIntelMatch: 'Similar to known spyware'
+    },
+    {
+      id: 'INC-2024-004',
+      timestamp: '2024-01-15T11:15:00Z',
+      severity: 'Critical',
+      type: 'Supply Chain Attack',
+      aiClassification: 'Nation State Actor',
+      title: 'Compromised Defence Software Update',
+      complainant: 'Brig. Vikram Yadav',
+      userType: 'Active Personnel',
+      location: 'Pune',
+      aiConfidence: 94.3,
+      status: 'Emergency Response',
+      riskScore: 98,
+      evidenceTypes: ['binary_analysis', 'network_traffic', 'code_signature'],
+      mitigationApplied: 'Update Rollback',
+      collectiveAlert: true,
+      sandboxResults: 'Backdoor implant detected',
+      threatIntelMatch: 'APT-40 tactics'
+    },
+    {
+      id: 'INC-2024-005',
+      timestamp: '2024-01-15T10:30:00Z',
+      severity: 'High',
+      type: 'Social Engineering',
+      aiClassification: 'Targeted Campaign',
+      title: 'Fake Military Exercise Invitation',
+      complainant: 'Col. Meera Nair',
+      userType: 'Active Personnel',
+      location: 'Chennai',
+      aiConfidence: 91.7,
+      status: 'Investigation Complete',
+      riskScore: 85,
+      evidenceTypes: ['email', 'voice_recording', 'caller_id'],
+      mitigationApplied: 'Personnel Alert',
+      collectiveAlert: true,
+      sandboxResults: 'Social engineering confirmed',
+      threatIntelMatch: 'Known adversary pattern'
+    },
+    {
+      id: 'INC-2024-006',
+      timestamp: '2024-01-15T09:45:00Z',
+      severity: 'Critical',
+      type: 'Data Breach',
+      aiClassification: 'Insider Threat',
+      title: 'Unauthorized Access to Classified Systems',
+      complainant: 'Maj. Gen. Suresh Reddy',
+      userType: 'Senior Officer',
+      location: 'Hyderabad',
+      aiConfidence: 96.8,
+      status: 'Containment Active',
+      riskScore: 99,
+      evidenceTypes: ['access_logs', 'file_transfers', 'user_behavior'],
+      mitigationApplied: 'Account Suspension',
+      collectiveAlert: true,
+      sandboxResults: 'Anomalous data access patterns',
+      threatIntelMatch: 'Insider threat indicators'
+    },
+    {
+      id: 'INC-2024-007',
+      timestamp: '2024-01-15T08:20:00Z',
+      severity: 'High',
+      type: 'Ransomware',
+      aiClassification: 'Crypto Locker',
+      title: 'Defence Contractor Network Encryption',
+      complainant: 'Air Cmde. Rakesh Joshi',
+      userType: 'Active Personnel',
+      location: 'Lucknow',
+      aiConfidence: 88.9,
+      status: 'Recovery In Progress',
+      riskScore: 87,
+      evidenceTypes: ['encrypted_files', 'ransom_note', 'network_logs'],
+      mitigationApplied: 'Network Isolation',
+      collectiveAlert: true,
+      sandboxResults: 'Ransomware family identified',
+      threatIntelMatch: 'DarkSide variant'
     }
   ];
 
@@ -235,15 +413,17 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                 </div>
               </div>
 
-              {/* Static Notifications - Matching CERT Army UI */}
+              {/* Enhanced Notifications */}
               <div className="relative">
-                <div className="p-2 bg-slate-700 border border-slate-600 rounded cursor-pointer hover:bg-slate-600 transition-colors">
+                <button
+                  onClick={() => setShowNotifications(true)}
+                  className="p-2 bg-slate-700 border border-slate-600 rounded cursor-pointer hover:bg-slate-600 transition-colors"
+                >
                   <Bell className="h-5 w-5 text-slate-300" />
-                  {/* Static notification badge matching the image */}
                   <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    3
+                    {notifications.filter(n => !n.read).length}
                   </div>
-                </div>
+                </button>
               </div>
 
               {/* User Menu */}
@@ -251,13 +431,13 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                 <button className="flex items-center space-x-3 p-2 text-slate-300 hover:text-white bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
                   <User className="h-6 w-6" />
                   <div className="text-left hidden sm:block">
-                    <div className="text-sm font-medium">CERT Analyst</div>
+                    <div className="text-sm font-medium">Analyst {analystName}</div>
                     <div className="text-xs text-slate-400">Level 3 Clearance</div>
                   </div>
                 </button>
 
                 {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-xl border border-slate-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999]">
                   <div className="py-2">
                     <div className="px-4 py-2 border-b border-slate-600">
                       <div className="text-sm font-medium text-white">Analyst Dashboard</div>
@@ -315,8 +495,8 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
                 className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeView === item.id
-                    ? 'border-teal-400 text-teal-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500'
+                  ? 'border-teal-400 text-teal-400'
+                  : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500'
                   }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -351,6 +531,13 @@ const EnhancedCertArmyDashboard: React.FC<EnhancedCertArmyDashboardProps> = ({ o
         <EnhancedIncidentModal
           incident={selectedIncident}
           onClose={() => setSelectedIncident(null)}
+        />
+      )}
+
+      {showNotifications && (
+        <NotificationsModal
+          notifications={notifications}
+          onClose={() => setShowNotifications(false)}
         />
       )}
     </div>
@@ -504,8 +691,8 @@ const IncidentsSection: React.FC<{ incidents: any[]; onSelectIncident: (incident
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-3 py-1 text-xs font-bold rounded-full ${incident.severity === 'Critical' ? 'bg-red-500 text-white' :
-                      incident.severity === 'High' ? 'bg-orange-500 text-white' :
-                        'bg-yellow-500 text-slate-900'
+                    incident.severity === 'High' ? 'bg-orange-500 text-white' :
+                      'bg-yellow-500 text-slate-900'
                     }`}>
                     {incident.type}
                   </span>
@@ -515,7 +702,7 @@ const IncidentsSection: React.FC<{ incidents: any[]; onSelectIncident: (incident
                     <div className="w-16 h-2 bg-slate-600 rounded-full mr-2">
                       <div
                         className={`h-2 rounded-full ${incident.riskScore > 80 ? 'bg-red-500' :
-                            incident.riskScore > 60 ? 'bg-orange-500' : 'bg-green-500'
+                          incident.riskScore > 60 ? 'bg-orange-500' : 'bg-green-500'
                           }`}
                         style={{ width: `${incident.riskScore}%` }}
                       />
@@ -662,7 +849,7 @@ const AIInsightsSection: React.FC<{ predictions: any[] }> = ({ predictions }) =>
                 <h4 className="font-semibold text-white">{prediction.type}</h4>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className={`h-4 w-4 ${prediction.trend === 'increasing' ? 'text-red-400' :
-                      prediction.trend === 'decreasing' ? 'text-green-400' : 'text-yellow-400'
+                    prediction.trend === 'decreasing' ? 'text-green-400' : 'text-yellow-400'
                     }`} />
                   <span className="text-sm text-slate-400">{prediction.trend}</span>
                 </div>
@@ -784,7 +971,7 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
               </div>
             </div>
           </div>
-          
+
           {/* Map Controls */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex space-x-2">
@@ -792,11 +979,10 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                 <button
                   key={view}
                   onClick={() => setMapView(view)}
-                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                    mapView === view 
-                      ? 'bg-green-500 text-white' 
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${mapView === view
+                      ? 'bg-green-500 text-white'
                       : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
-                  }`}
+                    }`}
                 >
                   {view.charAt(0).toUpperCase() + view.slice(1)}
                 </button>
@@ -807,11 +993,10 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
-                    timeRange === range 
-                      ? 'bg-blue-500 text-white' 
+                  className={`px-2 py-1 text-xs rounded transition-colors ${timeRange === range
+                      ? 'bg-blue-500 text-white'
                       : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
-                  }`}
+                    }`}
                 >
                   {range}
                 </button>
@@ -830,10 +1015,10 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                 backgroundSize: 'cover'
               }}
             />
-            
+
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-transparent to-slate-900/40" />
-            
+
             {/* Scanning Animation */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-green-400/10 to-transparent"
@@ -981,9 +1166,8 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                 return (
                   <motion.div
                     key={location.id}
-                    className={`p-4 bg-slate-700/50 rounded-lg border border-slate-600 cursor-pointer transition-all hover:bg-slate-600/50 ${
-                      selectedHotspot?.id === location.id ? 'ring-2 ring-green-400' : ''
-                    }`}
+                    className={`p-4 bg-slate-700/50 rounded-lg border border-slate-600 cursor-pointer transition-all hover:bg-slate-600/50 ${selectedHotspot?.id === location.id ? 'ring-2 ring-green-400' : ''
+                      }`}
                     onClick={() => setSelectedHotspot(location)}
                     whileHover={{ scale: 1.02 }}
                   >
@@ -1004,7 +1188,7 @@ const ThreatHeatmapSection: React.FC<{ heatmapData: any[] }> = ({ heatmapData })
                         <div className="text-xs text-slate-400">incidents</div>
                       </div>
                     </div>
-                    
+
                     <div className="text-sm text-slate-300 mb-3">
                       <div className="font-medium">{location.type}</div>
                       <div className="text-xs text-slate-400 mt-1">
@@ -1128,6 +1312,127 @@ const EnhancedIncidentModal: React.FC<{ incident: any; onClose: () => void }> = 
             <button className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center">
               <ArrowUp className="h-4 w-4 mr-2" />
               Escalate
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// Notifications Modal Component
+const NotificationsModal: React.FC<{
+  notifications: any[];
+  onClose: () => void;
+}> = ({ notifications, onClose }) => {
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'critical': return <AlertTriangle className="h-5 w-5 text-red-400" />;
+      case 'alert': return <Bell className="h-5 w-5 text-orange-400" />;
+      case 'system': return <Settings className="h-5 w-5 text-blue-400" />;
+      case 'incident': return <Shield className="h-5 w-5 text-purple-400" />;
+      case 'intelligence': return <Brain className="h-5 w-5 text-teal-400" />;
+      case 'sandbox': return <Activity className="h-5 w-5 text-green-400" />;
+      case 'collective': return <Users className="h-5 w-5 text-indigo-400" />;
+      case 'maintenance': return <Settings className="h-5 w-5 text-gray-400" />;
+      default: return <Bell className="h-5 w-5 text-slate-400" />;
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'border-l-red-500 bg-red-500/10';
+      case 'medium': return 'border-l-orange-500 bg-orange-500/10';
+      case 'low': return 'border-l-green-500 bg-green-500/10';
+      default: return 'border-l-slate-500 bg-slate-500/10';
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-600"
+      >
+        <div className="px-8 py-6 border-b border-slate-600 bg-gradient-to-r from-slate-700 to-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-100 flex items-center">
+                <Bell className="h-6 w-6 mr-2 text-teal-400" />
+                CERT-Army Notifications
+              </h2>
+              <p className="text-sm text-slate-400 mt-1">
+                {notifications.filter(n => !n.read).length} unread alerts
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <motion.div
+                key={notification.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-4 rounded-lg border-l-4 ${getPriorityColor(notification.priority)} ${!notification.read ? 'bg-slate-700/50' : 'bg-slate-800/30'
+                  } border border-slate-600/50`}
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className={`text-sm font-medium ${!notification.read ? 'text-slate-100' : 'text-slate-300'
+                        }`}>
+                        {notification.title}
+                      </h4>
+                      {!notification.read && (
+                        <div className="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0"></div>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-400 mb-2">
+                      {notification.message}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-500">
+                        {notification.time}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${notification.priority === 'high' ? 'bg-red-500/20 text-red-300' :
+                            notification.priority === 'medium' ? 'bg-orange-500/20 text-orange-300' :
+                              'bg-green-500/20 text-green-300'
+                          }`}>
+                          {notification.priority.toUpperCase()}
+                        </span>
+                        {!notification.read && (
+                          <button className="text-xs text-teal-400 hover:text-teal-300">
+                            Mark as read
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex justify-between border-t border-slate-600 pt-4">
+            <button className="text-sm text-teal-400 hover:text-teal-300">
+              Mark all as read
+            </button>
+            <button className="text-sm text-slate-500 hover:text-slate-400">
+              Clear all notifications
             </button>
           </div>
         </div>

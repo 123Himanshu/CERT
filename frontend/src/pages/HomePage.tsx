@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import {
   Shield,
   AlertTriangle,
@@ -74,10 +76,11 @@ import {
 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
+  const { t } = useLanguage();
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [selectedMediaFilter, setSelectedMediaFilter] = useState<'all' | 'images' | 'videos'>('all');
+
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [selectedThreatFilter, setSelectedThreatFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -259,104 +262,55 @@ const HomePage: React.FC = () => {
   const quickActions = [
     {
       id: 1,
-      title: 'Report Cybercrime',
-      description: 'File a new cybercrime complaint',
+      titleKey: 'quickActions.reportCrime',
+      descriptionKey: 'quickActions.reportCrimeDesc',
       icon: <FileText className="w-8 h-8" />,
       link: '/report',
       color: 'bg-defence-red-600 hover:bg-defence-red-700'
     },
     {
       id: 2,
-      title: 'Track Your Case',
-      description: 'Check status of existing reports',
+      titleKey: 'quickActions.trackCase',
+      descriptionKey: 'quickActions.trackCaseDesc',
       icon: <Search className="w-8 h-8" />,
       link: '/track',
       color: 'bg-defence-blue-600 hover:bg-defence-blue-700'
     },
     {
       id: 3,
-      title: 'Emergency Helpline',
-      description: 'Call 1930 for immediate assistance',
+      titleKey: 'quickActions.helpline',
+      descriptionKey: 'quickActions.helplineDesc',
       icon: <Phone className="w-8 h-8" />,
       link: 'tel:1930',
       color: 'bg-orange-600 hover:bg-orange-700'
     },
     {
       id: 4,
-      title: 'Cyber Awareness',
-      description: 'Learn about cyber threats',
+      titleKey: 'quickActions.awareness',
+      descriptionKey: 'quickActions.awarenessDesc',
       icon: <Shield className="w-8 h-8" />,
       link: '/awareness',
       color: 'bg-green-600 hover:bg-green-700'
     },
     {
       id: 5,
-      title: 'Training Resources',
-      description: 'Access training materials',
+      titleKey: 'quickActions.training',
+      descriptionKey: 'quickActions.trainingDesc',
       icon: <GraduationCap className="w-8 h-8" />,
       link: '/training',
       color: 'bg-purple-600 hover:bg-purple-700'
     },
     {
       id: 6,
-      title: 'Security Guidelines',
-      description: 'Download security protocols',
+      titleKey: 'quickActions.guidelines',
+      descriptionKey: 'quickActions.guidelinesDesc',
       icon: <Download className="w-8 h-8" />,
       link: '/guidelines',
       color: 'bg-indigo-600 hover:bg-indigo-700'
     }
   ];
 
-  // Mock media gallery data
-  const mediaGallery = [
-    {
-      id: 1,
-      title: 'Cybersecurity Training Session',
-      type: 'image',
-      thumbnail: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=300&fit=crop',
-      category: 'Training',
-      date: '2024-01-10',
-      size: '2.3 MB',
-      description: 'Advanced cybersecurity training for defence personnel'
-    },
-    {
-      id: 2,
-      title: 'Phishing Awareness Demo',
-      type: 'video',
-      thumbnail: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&h=300&fit=crop',
-      category: 'Awareness',
-      date: '2024-01-08',
-      size: '15.7 MB',
-      description: 'Interactive demonstration of phishing attack techniques'
-    },
-    {
-      id: 3,
-      title: 'Digital Forensics Lab',
-      type: 'image',
-      thumbnail: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&h=300&fit=crop',
-      category: 'Forensics',
-      date: '2024-01-05',
-      size: '3.1 MB',
-      description: 'State-of-the-art digital forensics laboratory setup'
-    },
-    {
-      id: 4,
-      title: 'Incident Response Protocol',
-      type: 'video',
-      thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop',
-      category: 'Protocol',
-      date: '2024-01-03',
-      size: '22.4 MB',
-      description: 'Step-by-step incident response procedures'
-    }
-  ];
 
-  const filteredMedia = mediaGallery.filter(item => {
-    if (selectedMediaFilter === 'all') return true;
-    if (selectedMediaFilter === 'images') return item.type === 'image';
-    if (selectedMediaFilter === 'videos') return item.type === 'video';
-    return false;
-  });
 
   const filteredThreats = cyberThreats.filter(threat => {
     if (selectedThreatFilter === 'all') return true;
@@ -440,18 +394,18 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-defence-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100">
       {/* Official Government Header */}
-      <header className="bg-white border-b-4 border-defence-blue-600 shadow-sm sticky top-0 z-50">
+      <header className="bg-white border-b-4 border-blue-600 shadow-sm sticky top-0 z-50">
         {/* Top Government Bar */}
-        <div className="bg-defence-blue-900 text-white py-2">
+        <div className="bg-slate-800 text-white py-2">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center text-sm">
               <div className="flex items-center space-x-6">
-                <span>Government of India | Ministry of Defence</span>
+                <span>{t('header.government')}</span>
                 <span className="hidden md:flex items-center">
                   <Globe className="w-4 h-4 mr-1" />
-                  National Cyber Security Portal
+                  {t('header.portal')}
                 </span>
               </div>
               <div className="flex items-center space-x-4">
@@ -459,9 +413,9 @@ const HomePage: React.FC = () => {
                   <Clock className="w-4 h-4 mr-1" />
                   {currentTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
                 </span>
-                <span className="flex items-center bg-defence-red-600 px-2 py-1 rounded text-xs font-semibold">
+                <span className="flex items-center bg-red-600 px-2 py-1 rounded text-xs font-semibold">
                   <Phone className="w-3 h-3 mr-1" />
-                  Emergency: 1930
+                  {t('header.emergency')}
                 </span>
               </div>
             </div>
@@ -469,11 +423,11 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Breaking News Ticker */}
-        <div className="bg-defence-red-600 text-white py-1 overflow-hidden">
+        <div className="bg-red-600 text-white py-1 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center">
-              <span className="bg-white text-defence-red-600 px-2 py-1 text-xs font-bold rounded mr-4 flex-shrink-0">
-                LATEST UPDATE
+              <span className="bg-white text-red-600 px-2 py-1 text-xs font-bold rounded mr-4 flex-shrink-0">
+                {t('news.latest')}
               </span>
               <div className="overflow-hidden">
                 <motion.div
@@ -484,7 +438,7 @@ const HomePage: React.FC = () => {
                   transition={{ duration: 0.5 }}
                   className="text-sm font-medium whitespace-nowrap"
                 >
-                  {governmentNews[newsIndex]?.title} - {governmentNews[newsIndex]?.summary}
+                  {t(`news.${newsIndex + 1}.title`)} - {t(`news.${newsIndex + 1}.summary`)}
                 </motion.div>
               </div>
             </div>
@@ -501,15 +455,15 @@ const HomePage: React.FC = () => {
                 className="h-14 w-auto"
               />
               <div>
-                <h1 className="text-2xl font-bold text-defence-gray-900">
-                  Defence Personnel Cyber Security Network
+                <h1 className="text-2xl font-bold text-slate-800">
+                  {t('header.title')}
                 </h1>
-                <p className="text-sm text-defence-gray-600 flex items-center">
+                <p className="text-sm text-slate-600 flex items-center">
                   <Shield className="w-4 h-4 mr-1" />
-                  National Cyber Incident Response & Safety Portal
+                  {t('header.subtitle')}
                 </p>
                 <p className="text-xs text-defence-gray-500 mt-1">
-                  Established under Cyber Security Division, Ministry of Defence
+                  {t('header.established')}
                 </p>
               </div>
             </div>
@@ -520,53 +474,48 @@ const HomePage: React.FC = () => {
                 to="/"
                 className="font-medium text-defence-blue-600 border-b-2 border-defence-blue-600 pb-1 px-2"
               >
-                Home
-              </Link>
-              <Link
-                to="/report-incident"
-                className="font-medium text-defence-gray-700 hover:text-defence-blue-600 transition-colors px-2 py-1 rounded hover:bg-defence-blue-50"
-              >
-                Report Incident
+                {t('nav.home')}
               </Link>
               <Link
                 to="/cyber-awareness"
                 className="font-medium text-defence-gray-700 hover:text-defence-blue-600 transition-colors px-2 py-1 rounded hover:bg-defence-blue-50"
               >
-                Cyber Awareness
+                {t('nav.awareness')}
               </Link>
               <Link
                 to="/training"
                 className="font-medium text-defence-gray-700 hover:text-defence-blue-600 transition-colors px-2 py-1 rounded hover:bg-defence-blue-50"
               >
-                Training
+                {t('nav.training')}
               </Link>
               <Link
                 to="/resources"
                 className="font-medium text-defence-gray-700 hover:text-defence-blue-600 transition-colors px-2 py-1 rounded hover:bg-defence-blue-50"
               >
-                Resources
+                {t('nav.resources')}
               </Link>
               <Link
                 to="/contact"
                 className="font-medium text-defence-gray-700 hover:text-defence-blue-600 transition-colors px-2 py-1 rounded hover:bg-defence-blue-50"
               >
-                Contact
+                {t('nav.contact')}
               </Link>
             </nav>
 
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               <div className="hidden sm:flex items-center space-x-2">
                 <Link
                   to="/login"
                   className="px-4 py-2 text-sm font-medium text-defence-blue-600 bg-defence-blue-50 border border-defence-blue-200 rounded hover:bg-defence-blue-100 transition-colors"
                 >
-                  Defence Personnel Login
+                  {t('nav.login')}
                 </Link>
                 <Link
                   to="/register"
                   className="px-4 py-2 text-sm font-medium text-white bg-defence-blue-600 border border-defence-blue-600 rounded hover:bg-defence-blue-700 transition-colors"
                 >
-                  New Defence Personnel Registration
+                  {t('nav.register')}
                 </Link>
               </div>
 
@@ -589,21 +538,21 @@ const HomePage: React.FC = () => {
                   className="font-medium text-defence-blue-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Home
+                  {t('nav.home')}
                 </Link>
                 <Link
                   to="/cyber-awareness"
                   className="font-medium text-defence-gray-700 hover:text-defence-blue-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Cyber Awareness
+                  {t('nav.awareness')}
                 </Link>
                 <Link
                   to="/contact"
                   className="font-medium text-defence-gray-700 hover:text-defence-blue-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Contact Us
+                  {t('nav.contact')}
                 </Link>
                 <div className="flex flex-col space-y-2 pt-4 border-t border-defence-gray-200">
                   <Link
@@ -611,14 +560,14 @@ const HomePage: React.FC = () => {
                     className="w-full text-left px-4 py-2 text-sm font-medium text-defence-blue-600 bg-defence-blue-50 border border-defence-blue-200 rounded hover:bg-defence-blue-100 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Defence Personnel Login
+                    {t('nav.login')}
                   </Link>
                   <Link
                     to="/register"
                     className="w-full text-left px-4 py-2 text-sm font-medium text-white bg-defence-blue-600 border border-defence-blue-600 rounded hover:bg-defence-blue-700 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    New Defence Personnel Registration
+                    {t('nav.register')}
                   </Link>
                 </div>
               </nav>
@@ -640,7 +589,7 @@ const HomePage: React.FC = () => {
               >
                 <span className="bg-defence-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center w-fit">
                   <Shield className="w-4 h-4 mr-2" />
-                  Secure • Confidential • 24/7 Available
+                  {t('hero.badge')}
                 </span>
               </motion.div>
 
@@ -650,8 +599,8 @@ const HomePage: React.FC = () => {
                 transition={{ duration: 0.8, delay: 0.1 }}
                 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight"
               >
-                One Force, One Family,
-                <span className="text-defence-red-400"> One Secure Network</span>
+                {t('hero.title')}
+                <span className="text-defence-red-400">{t('hero.titleHighlight')}</span>
               </motion.h1>
 
               <motion.p
@@ -660,7 +609,7 @@ const HomePage: React.FC = () => {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-xl text-defence-blue-100 mb-8 leading-relaxed"
               >
-                India's premier cybersecurity portal dedicated to protecting our defence personnel, their families, and veterans from cyber threats. Report incidents, access training, and stay secure.
+                {t('hero.description')}
               </motion.p>
 
               <motion.div
@@ -674,14 +623,14 @@ const HomePage: React.FC = () => {
                   className="bg-defence-red-600 hover:bg-defence-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold flex items-center justify-center space-x-2 transition-colors shadow-lg"
                 >
                   <Phone className="w-6 h-6" />
-                  <span>🚨 Emergency: 1930</span>
+                  <span>{t('hero.emergency')}</span>
                 </a>
                 <Link
                   to="/report"
                   className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-defence-blue-900 px-8 py-4 rounded-lg text-lg font-semibold flex items-center justify-center space-x-2 transition-colors"
                 >
                   <FileText className="w-6 h-6" />
-                  <span>Report Incident</span>
+                  <span>{t('hero.reportIncident')}</span>
                 </Link>
               </motion.div>
             </div>
@@ -693,23 +642,23 @@ const HomePage: React.FC = () => {
               className="relative"
             >
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                <h3 className="text-2xl font-bold mb-6 text-center">Security Statistics</h3>
+                <h3 className="text-2xl font-bold mb-6 text-center">{t('hero.stats.title')}</h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-defence-red-400">{securityStats.totalReports.toLocaleString()}</div>
-                    <div className="text-sm text-defence-blue-100">Total Reports</div>
+                    <div className="text-sm text-defence-blue-100">{t('hero.stats.totalReports')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-400">{securityStats.resolvedCases.toLocaleString()}</div>
-                    <div className="text-sm text-defence-blue-100">Cases Resolved</div>
+                    <div className="text-sm text-defence-blue-100">{t('hero.stats.resolved')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-yellow-400">{securityStats.activeInvestigations.toLocaleString()}</div>
-                    <div className="text-sm text-defence-blue-100">Active Cases</div>
+                    <div className="text-sm text-defence-blue-100">{t('hero.stats.active')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-blue-400">{securityStats.preventedAttacks.toLocaleString()}</div>
-                    <div className="text-sm text-defence-blue-100">Attacks Prevented</div>
+                    <div className="text-sm text-defence-blue-100">{t('hero.stats.prevented')}</div>
                   </div>
                 </div>
               </div>
@@ -733,9 +682,9 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-defence-gray-900 mb-4">Quick Actions</h2>
+            <h2 className="text-3xl font-bold text-defence-gray-900 mb-4">{t('quickActions.title')}</h2>
             <p className="text-lg text-defence-gray-600 max-w-3xl mx-auto">
-              Access essential cybersecurity services and resources designed specifically for defence personnel and their families.
+              {t('quickActions.description')}
             </p>
           </div>
 
@@ -758,8 +707,8 @@ const HomePage: React.FC = () => {
                     </div>
                     <ArrowRight className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{action.title}</h3>
-                  <p className="text-white/90">{action.description}</p>
+                  <h3 className="text-xl font-semibold mb-2">{t(action.titleKey)}</h3>
+                  <p className="text-white/90">{t(action.descriptionKey)}</p>
                 </Link>
               </motion.div>
             ))}
@@ -771,8 +720,8 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-defence-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-defence-gray-900 mb-2">How Reporting Works</h2>
-            <p className="text-lg text-defence-gray-600">A clear, step-by-step guide to filing a cybercrime report</p>
+            <h2 className="text-3xl font-bold text-defence-gray-900 mb-2">{t('reporting.title')}</h2>
+            <p className="text-lg text-defence-gray-600">{t('reporting.description')}</p>
           </div>
 
           <ol className="relative border-s-2 border-defence-blue-200">
@@ -780,36 +729,36 @@ const HomePage: React.FC = () => {
               <span className="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full bg-defence-blue-600 ring-8 ring-defence-gray-100">
                 <FileText className="h-3.5 w-3.5 text-white" />
               </span>
-              <h3 className="text-xl font-semibold text-defence-gray-900">Prepare Details</h3>
-              <p className="mt-1 text-defence-gray-600">Gather incident date/time, description, screenshots, bank records, and any suspect information.</p>
+              <h3 className="text-xl font-semibold text-defence-gray-900">{t('reporting.step1.title')}</h3>
+              <p className="mt-1 text-defence-gray-600">{t('reporting.step1.description')}</p>
             </li>
             <li className="mb-10 ms-6">
               <span className="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full bg-defence-blue-600 ring-8 ring-defence-gray-100">
                 <Upload className="h-3.5 w-3.5 text-white" />
               </span>
-              <h3 className="text-xl font-semibold text-defence-gray-900">Upload Evidence</h3>
-              <p className="mt-1 text-defence-gray-600">Attach documents and media supporting your case. Ensure files are clear and legible.</p>
+              <h3 className="text-xl font-semibold text-defence-gray-900">{t('reporting.step2.title')}</h3>
+              <p className="mt-1 text-defence-gray-600">{t('reporting.step2.description')}</p>
             </li>
             <li className="mb-10 ms-6">
               <span className="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full bg-defence-blue-600 ring-8 ring-defence-gray-100">
                 <Search className="h-3.5 w-3.5 text-white" />
               </span>
-              <h3 className="text-xl font-semibold text-defence-gray-900">Review & Submit</h3>
-              <p className="mt-1 text-defence-gray-600">Double-check all entries before submission to help speed up verification and action.</p>
+              <h3 className="text-xl font-semibold text-defence-gray-900">{t('reporting.step3.title')}</h3>
+              <p className="mt-1 text-defence-gray-600">{t('reporting.step3.description')}</p>
             </li>
             <li className="ms-6">
               <span className="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full bg-defence-blue-600 ring-8 ring-defence-gray-100">
                 <CheckCircle className="h-3.5 w-3.5 text-white" />
               </span>
-              <h3 className="text-xl font-semibold text-defence-gray-900">Track Your Case</h3>
-              <p className="mt-1 text-defence-gray-600">After submitting, you'll receive an acknowledgement. Tracking is available from your dashboard.</p>
+              <h3 className="text-xl font-semibold text-defence-gray-900">{t('reporting.step4.title')}</h3>
+              <p className="mt-1 text-defence-gray-600">{t('reporting.step4.description')}</p>
             </li>
           </ol>
         </div>
       </section>
 
       {/* AI Cyber Threat Updates Section */}
-      <section className="py-16 bg-defence-gray-900 text-white">
+      <section className="py-16 bg-defence-blue-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
             <div>
@@ -955,8 +904,8 @@ const HomePage: React.FC = () => {
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${news.priority === 'high' ? 'bg-defence-red-100 text-defence-red-800' :
-                        news.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-defence-blue-100 text-defence-blue-800'
+                      news.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-defence-blue-100 text-defence-blue-800'
                       }`}>
                       {news.category}
                     </span>
@@ -1019,71 +968,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Media Gallery Section */}
-      <section className="py-16 bg-defence-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-defence-gray-900 mb-4">Training & Awareness Media Gallery</h2>
-            <p className="text-lg text-defence-gray-600">Explore our comprehensive collection of cybersecurity training materials, awareness videos, and educational resources.</p>
-          </div>
-
-          <div className="flex justify-center space-x-4 mb-8">
-            <button
-              onClick={() => setSelectedMediaFilter('all')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'all' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
-            >
-              All ({mediaGallery.length})
-            </button>
-            <button
-              onClick={() => setSelectedMediaFilter('images')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'images' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
-            >
-              Images ({mediaGallery.filter(item => item.type === 'image').length})
-            </button>
-            <button
-              onClick={() => setSelectedMediaFilter('videos')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${selectedMediaFilter === 'videos' ? 'bg-defence-blue-600 text-white' : 'bg-defence-gray-200 text-defence-gray-700 hover:bg-defence-gray-300'}`}
-            >
-              Videos ({mediaGallery.filter(item => item.type === 'video').length})
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredMedia.map(item => (
-              <motion.div
-                key={item.id}
-                className="relative bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-lg transition-shadow duration-300 border border-defence-gray-200"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="aspect-w-16 aspect-h-9">
-                  <img
-                    src={item.thumbnail}
-                    alt={item.title}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {item.type === 'video' && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 group-hover:bg-opacity-60 transition-all">
-                      <Play className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full mb-2 ${getCategoryColor(item.category)}`}>
-                    {item.category}
-                  </span>
-                  <h3 className="text-lg font-semibold text-defence-gray-900 mb-1">{item.title}</h3>
-                  <p className="text-sm text-defence-gray-600 line-clamp-2">{item.description}</p>
-                  <div className="flex justify-between items-center text-xs text-defence-gray-500 mt-2">
-                    <span>{item.date}</span>
-                    <span>{item.size}</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Contact & Support Section */}
       <section className="py-16 bg-defence-blue-900 text-white">

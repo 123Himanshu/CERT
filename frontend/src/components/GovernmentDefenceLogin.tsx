@@ -5,7 +5,6 @@ import {
   Phone, Mail, MapPin, Calendar, Clock, Info, FileText, Globe, Flag
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import LanguageSelector from './LanguageSelector';
 
 interface GovernmentDefenceLoginProps {
   onLogin: () => void;
@@ -132,7 +131,6 @@ const GovernmentDefenceLogin: React.FC<GovernmentDefenceLoginProps> = ({ onLogin
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <LanguageSelector />
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-900">Emergency Helpline</div>
                 <div className="text-lg font-bold text-red-600">1930</div>

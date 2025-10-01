@@ -4,10 +4,9 @@ import {
   Shield, AlertTriangle, FileText, Clock, CheckCircle, Phone, Bell, BookOpen, Plus, Eye, Upload, Calendar,
   User, MapPin, TrendingUp, Activity, Zap, Mic, MessageSquare, Bot, Globe, Brain, Radar, Camera,
   Video, AudioLines, FileImage, Smartphone, Wifi, WifiOff, LogOut, Settings, Home, BarChart3,
-  Headphones, Volume2, Play, Pause, Download, Share2, ExternalLink, AlertCircle, Info
+  Headphones, Volume2, Play, Pause, Download, Share2, ExternalLink, AlertCircle, Info, X
 } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import LanguageSelector from './LanguageSelector';
+
 import EnhancedReportSubmission from './EnhancedReportSubmission';
 
 interface ComprehensiveDefenceDashboardProps {
@@ -15,13 +14,28 @@ interface ComprehensiveDefenceDashboardProps {
 }
 
 const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps> = ({ onLogout }) => {
-  const { t } = useLanguage();
   const [showReportForm, setShowReportForm] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [showAutoDetection, setShowAutoDetection] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedThreat, setSelectedThreat] = useState<any>(null);
+  const [toasts, setToasts] = useState<Array<{ id: number, message: string, type: 'success' | 'error' | 'info' }>>([]);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 4000);
+  };
+
+  const handleViewThreatDetails = (threat: any) => {
+    setSelectedThreat(threat);
+  };
 
   // Enhanced complaint data with AI classification
   const userComplaints = [
@@ -66,10 +80,91 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
     }
   ];
 
-  // Real-time threat alerts
+  // Enhanced real-time threat alerts with detailed mock data
   const threatAlerts = [
     {
       id: 1,
+      message: 'Phishing campaign targeting Army personnel detected',
+      time: '2 minutes ago',
+      severity: 'critical',
+      action: 'blocked',
+      details: {
+        threatType: 'Phishing Email Campaign',
+        source: 'fake-army-portal.com',
+        targetsAffected: 1247,
+        geolocation: 'Pakistan',
+        iocs: ['185.220.101.42', 'army-pension-update.tk', 'SHA256: a1b2c3d4...'],
+        description: 'Sophisticated phishing campaign impersonating official Army Pension Portal. Emails contain malicious links attempting to steal credentials.',
+        mitigationSteps: [
+          'All suspicious emails automatically quarantined',
+          'DNS blocking implemented for malicious domains',
+          'User awareness alerts sent to all personnel',
+          'Incident reported to Cyber Crime Cell'
+        ],
+        timeline: [
+          { time: '14:30', event: 'First phishing email detected' },
+          { time: '14:32', event: 'Pattern analysis completed' },
+          { time: '14:35', event: 'Automatic blocking activated' },
+          { time: '14:37', event: 'Alert sent to all units' }
+        ]
+      }
+    },
+    {
+      id: 2,
+      message: 'Suspicious app installation blocked on 15 devices',
+      time: '5 minutes ago',
+      severity: 'high',
+      action: 'blocked',
+      details: {
+        threatType: 'Malicious Mobile Application',
+        source: 'third-party-store.apk',
+        targetsAffected: 15,
+        geolocation: 'China',
+        iocs: ['com.fake.armyapp', 'MD5: e4f5g6h7...', '192.168.1.100'],
+        description: 'Fake military communication app attempting to access sensitive device permissions and exfiltrate data.',
+        mitigationSteps: [
+          'App installation blocked on all devices',
+          'Device scans initiated automatically',
+          'Users notified about security risk',
+          'App blacklisted in security database'
+        ],
+        timeline: [
+          { time: '14:25', event: 'Suspicious app download detected' },
+          { time: '14:26', event: 'Behavioral analysis triggered' },
+          { time: '14:28', event: 'Malicious intent confirmed' },
+          { time: '14:30', event: 'Installation blocked across network' }
+        ]
+      }
+    },
+    {
+      id: 3,
+      message: 'Voice call scam pattern identified - 23 calls blocked',
+      time: '8 minutes ago',
+      severity: 'medium',
+      action: 'warned',
+      details: {
+        threatType: 'Voice Call Scam Campaign',
+        source: '+92-XXX-XXXX-XXX',
+        targetsAffected: 23,
+        geolocation: 'Cross-border',
+        iocs: ['+92-300-1234567', '+92-301-7654321', 'Caller ID: Army Pension Office'],
+        description: 'Coordinated scam calls impersonating Army Pension Office requesting personal and financial information.',
+        mitigationSteps: [
+          'Caller numbers added to blacklist',
+          'Voice pattern analysis updated',
+          'Personnel warned via SMS alerts',
+          'Telecom providers notified'
+        ],
+        timeline: [
+          { time: '14:20', event: 'First scam call reported' },
+          { time: '14:22', event: 'Pattern matching initiated' },
+          { time: '14:24', event: 'Similar calls identified' },
+          { time: '14:26', event: 'Automatic call blocking enabled' }
+        ]
+      }
+    },
+    {
+      id: 4,
       type: 'auto-detection',
       message: '🛡️ Auto-Detection: Malicious SMS link blocked before you clicked',
       time: '2 minutes ago',
@@ -94,21 +189,71 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
     }
   ];
 
-  // AI Predictions
+  // Enhanced AI Predictions with detailed analysis
   const aiPredictions = [
     {
-      type: 'Phishing Campaign',
+      type: 'Advanced Phishing Campaign',
       probability: 87,
       timeframe: 'Next 48 hours',
-      target: 'Defence Pension Portal',
-      confidence: 94
+      target: 'Defence Pension Portal Users',
+      confidence: 94,
+      details: {
+        vectorAnalysis: 'Email-based social engineering',
+        geographicOrigin: 'Pakistan, China',
+        targetedUnits: ['Army HQ', 'Naval Command', 'Air Force Stations'],
+        predictedImpact: 'High - Credential theft, financial fraud',
+        preventiveMeasures: ['Email filtering enhanced', 'User awareness alerts', 'MFA enforcement'],
+        similarIncidents: 3,
+        riskScore: 8.7
+      }
     },
     {
-      type: 'Malware Distribution',
+      type: 'Mobile Malware Distribution',
       probability: 72,
-      timeframe: 'Next week',
-      target: 'Mobile Apps',
-      confidence: 89
+      timeframe: 'Next 7 days',
+      target: 'Android Devices',
+      confidence: 89,
+      details: {
+        vectorAnalysis: 'Third-party app stores, SMS links',
+        geographicOrigin: 'North Korea, Iran',
+        targetedUnits: ['Field Units', 'Border Posts', 'Communication Centers'],
+        predictedImpact: 'Medium - Data exfiltration, device compromise',
+        preventiveMeasures: ['App store restrictions', 'Device scanning', 'Network monitoring'],
+        similarIncidents: 7,
+        riskScore: 7.2
+      }
+    },
+    {
+      type: 'Supply Chain Attack',
+      probability: 45,
+      timeframe: 'Next 30 days',
+      target: 'Defence Contractors',
+      confidence: 76,
+      details: {
+        vectorAnalysis: 'Compromised software updates',
+        geographicOrigin: 'State-sponsored actors',
+        targetedUnits: ['R&D Centers', 'Manufacturing Units', 'IT Infrastructure'],
+        predictedImpact: 'Critical - Intellectual property theft, system compromise',
+        preventiveMeasures: ['Vendor security audits', 'Code signing verification', 'Network segmentation'],
+        similarIncidents: 2,
+        riskScore: 9.1
+      }
+    },
+    {
+      type: 'Voice Deepfake Attacks',
+      probability: 34,
+      timeframe: 'Next 60 days',
+      target: 'Senior Officers',
+      confidence: 68,
+      details: {
+        vectorAnalysis: 'AI-generated voice calls',
+        geographicOrigin: 'Advanced threat actors',
+        targetedUnits: ['Command Centers', 'Intelligence Units', 'Strategic Commands'],
+        predictedImpact: 'High - Unauthorized orders, information disclosure',
+        preventiveMeasures: ['Voice authentication systems', 'Verification protocols', 'Training programs'],
+        similarIncidents: 1,
+        riskScore: 8.3
+      }
     }
   ];
 
@@ -183,8 +328,6 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
             </div>
 
             <div className="flex items-center space-x-4">
-              <LanguageSelector />
-
               {/* Emergency Button */}
               <motion.a
                 href="tel:1930"
@@ -197,7 +340,10 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
 
               {/* Notifications */}
               <div className="relative">
-                <button className="p-2 text-gray-600 hover:text-gray-800 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                <button
+                  onClick={() => setShowNotifications(true)}
+                  className="p-2 text-gray-600 hover:text-gray-800 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
                   <Bell className="h-6 w-6" />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {threatAlerts.length}
@@ -215,7 +361,10 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
                 {/* Dropdown Menu */}
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
-                    <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
+                    <button
+                      onClick={() => setShowSettings(true)}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                    >
                       <Settings className="h-4 w-4" />
                       <span>Settings</span>
                     </button>
@@ -244,8 +393,8 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 <tab.icon className="h-5 w-5" />
@@ -318,7 +467,12 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
               <div className="p-6">
                 <div className="space-y-4">
                   {threatAlerts.map((alert, index) => (
-                    <ThreatAlertCard key={alert.id} alert={alert} index={index} />
+                    <ThreatAlertCard
+                      key={alert.id}
+                      alert={alert}
+                      index={index}
+                      onViewDetails={handleViewThreatDetails}
+                    />
                   ))}
                 </div>
               </div>
@@ -410,7 +564,7 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
 
         {/* Live Alerts Tab */}
         {activeTab === 'alerts' && (
-          <LiveAlertsTab alerts={threatAlerts} />
+          <LiveAlertsTab alerts={threatAlerts} onViewDetails={handleViewThreatDetails} />
         )}
       </div>
 
@@ -424,6 +578,7 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
             onClose={() => setShowVoiceRecorder(false)}
             isRecording={isRecording}
             setIsRecording={setIsRecording}
+            showToast={showToast}
           />
         )}
         {showAutoDetection && (
@@ -435,7 +590,44 @@ const ComprehensiveDefenceDashboard: React.FC<ComprehensiveDefenceDashboardProps
             onClose={() => setSelectedComplaint(null)}
           />
         )}
+        {selectedThreat && (
+          <ThreatDetailsModal
+            threat={selectedThreat}
+            onClose={() => setSelectedThreat(null)}
+          />
+        )}
+        {showSettings && (
+          <SettingsModal onClose={() => setShowSettings(false)} />
+        )}
+        {showNotifications && (
+          <NotificationsModal onClose={() => setShowNotifications(false)} />
+        )}
       </AnimatePresence>
+
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 300 }}
+              className={`p-4 rounded-lg shadow-lg max-w-sm ${toast.type === 'success' ? 'bg-green-600 text-white' :
+                toast.type === 'error' ? 'bg-red-600 text-white' :
+                  'bg-blue-600 text-white'
+                }`}
+            >
+              <div className="flex items-center space-x-2">
+                {toast.type === 'success' && <CheckCircle className="h-5 w-5" />}
+                {toast.type === 'error' && <AlertTriangle className="h-5 w-5" />}
+                {toast.type === 'info' && <Info className="h-5 w-5" />}
+                <span className="text-sm font-medium">{toast.message}</span>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
@@ -510,8 +702,8 @@ const QuickActionCard: React.FC<{
   );
 };
 
-// Threat Alert Card Component
-const ThreatAlertCard: React.FC<{ alert: any; index: number }> = ({ alert, index }) => {
+// Enhanced Threat Alert Card Component with Details Modal
+const ThreatAlertCard: React.FC<{ alert: any; index: number; onViewDetails: (alert: any) => void }> = ({ alert, index, onViewDetails }) => {
   const severityColors = {
     high: 'border-red-400 bg-red-50',
     medium: 'border-orange-400 bg-orange-50',
@@ -531,17 +723,127 @@ const ThreatAlertCard: React.FC<{ alert: any; index: number }> = ({ alert, index
           <div className="flex items-center space-x-4">
             <span className="text-xs text-gray-500">{alert.time}</span>
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${alert.action === 'blocked' ? 'bg-red-100 text-red-800' :
-                alert.action === 'warned' ? 'bg-orange-100 text-orange-800' :
-                  'bg-purple-100 text-purple-800'
+              alert.action === 'warned' ? 'bg-orange-100 text-orange-800' :
+                'bg-purple-100 text-purple-800'
               }`}>
               {alert.action}
             </span>
+            <span className="text-xs text-gray-500">
+              {alert.details?.targetsAffected} affected
+            </span>
           </div>
         </div>
-        <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+        <button
+          onClick={() => onViewDetails(alert)}
+          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+        >
+          <Eye className="h-4 w-4 mr-1" />
           View Details
         </button>
       </div>
+    </motion.div>
+  );
+};
+
+// Threat Details Modal Component
+const ThreatDetailsModal: React.FC<{ threat: any; onClose: () => void }> = ({ threat, onClose }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-red-50 to-orange-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <AlertTriangle className="h-6 w-6 mr-2 text-red-600" />
+                Threat Analysis Report
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">{threat.details?.threatType}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-8 space-y-6">
+          {/* Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-red-50 p-4 rounded-xl">
+              <h4 className="font-semibold text-red-900 mb-2">Severity Level</h4>
+              <p className="text-2xl font-bold text-red-600 capitalize">{threat.severity}</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-xl">
+              <h4 className="font-semibold text-blue-900 mb-2">Targets Affected</h4>
+              <p className="text-2xl font-bold text-blue-600">{threat.details?.targetsAffected}</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-xl">
+              <h4 className="font-semibold text-green-900 mb-2">Status</h4>
+              <p className="text-2xl font-bold text-green-600 capitalize">{threat.action}</p>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="bg-gray-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Threat Description</h3>
+            <p className="text-gray-700">{threat.details?.description}</p>
+          </div>
+
+          {/* IOCs */}
+          <div className="bg-yellow-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Indicators of Compromise (IOCs)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {threat.details?.iocs?.map((ioc: string, index: number) => (
+                <div key={index} className="bg-white p-3 rounded-lg border">
+                  <code className="text-sm text-gray-800">{ioc}</code>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="bg-blue-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Incident Timeline</h3>
+            <div className="space-y-3">
+              {threat.details?.timeline?.map((event: any, index: number) => (
+                <div key={index} className="flex items-center space-x-4">
+                  <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded font-mono">
+                    {event.time}
+                  </div>
+                  <div className="flex-1 bg-white p-3 rounded-lg">
+                    {event.event}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mitigation Steps */}
+          <div className="bg-green-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Mitigation Actions Taken</h3>
+            <div className="space-y-2">
+              {threat.details?.mitigationSteps?.map((step: string, index: number) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };
@@ -678,7 +980,7 @@ const ReportsTab: React.FC<{ complaints: any[]; onSelectComplaint: (complaint: a
 };
 
 // Live Alerts Tab Component
-const LiveAlertsTab: React.FC<{ alerts: any[] }> = ({ alerts }) => {
+const LiveAlertsTab: React.FC<{ alerts: any[]; onViewDetails: (alert: any) => void }> = ({ alerts, onViewDetails }) => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -696,7 +998,12 @@ const LiveAlertsTab: React.FC<{ alerts: any[] }> = ({ alerts }) => {
         <div className="p-6">
           <div className="space-y-4">
             {alerts.map((alert, index) => (
-              <ThreatAlertCard key={alert.id} alert={alert} index={index} />
+              <ThreatAlertCard
+                key={alert.id}
+                alert={alert}
+                index={index}
+                onViewDetails={onViewDetails}
+              />
             ))}
           </div>
         </div>
@@ -839,13 +1146,63 @@ const EnhancedReportModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   );
 };
 
-// Voice Recorder Modal
+// Enhanced Voice Recorder Modal with AI Assistant
 const VoiceRecorderModal: React.FC<{
   onClose: () => void;
   isRecording: boolean;
   setIsRecording: (recording: boolean) => void;
-}> = ({ onClose, isRecording, setIsRecording }) => {
+  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+}> = ({ onClose, isRecording, setIsRecording, showToast }) => {
   const [recordingTime, setRecordingTime] = useState(0);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [detectedInfo, setDetectedInfo] = useState({
+    threatType: '',
+    urgency: '',
+    location: '',
+    timeOfIncident: ''
+  });
+  const [showAiForm, setShowAiForm] = useState(false);
+  const [currentPhoneNumber, setCurrentPhoneNumber] = useState('+91-1930');
+
+  // Simulate AI processing when recording stops
+  React.useEffect(() => {
+    if (!isRecording && recordingTime > 0) {
+      setTimeout(() => {
+        setDetectedInfo({
+          threatType: 'Phishing Call',
+          urgency: 'High',
+          location: 'Delhi Cantonment',
+          timeOfIncident: new Date().toLocaleString()
+        });
+        setAiSuggestions([
+          'Caller claimed to be from Army Pension Office',
+          'Asked for service number and bank details',
+          'Suspicious background noise detected',
+          'Number not in official directory'
+        ]);
+        setShowAiForm(true);
+      }, 2000);
+    }
+  }, [isRecording, recordingTime]);
+
+  // Simulate changing phone numbers
+  React.useEffect(() => {
+    const numbers = ['+91-1930', '+91-1800-11-4444', '+91-011-2309-8989', '+91-1800-180-1551'];
+    const interval = setInterval(() => {
+      setCurrentPhoneNumber(numbers[Math.floor(Math.random() * numbers.length)]);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   return (
     <motion.div
@@ -858,58 +1215,173 @@ const VoiceRecorderModal: React.FC<{
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
+        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
-          <h2 className="text-2xl font-bold text-gray-900">Voice Report</h2>
-          <p className="text-sm text-gray-600 mt-1">Record your complaint in your preferred language</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Bot className="h-6 w-6 mr-2 text-green-600" />
+                AI-Assisted Voice Report
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">AI will help you fill out the details automatically</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Emergency Helpline</p>
+              <p className="text-lg font-bold text-green-600">{currentPhoneNumber}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="p-8 text-center">
-          <div className="mb-8">
-            <motion.div
-              animate={{ scale: isRecording ? [1, 1.2, 1] : 1 }}
-              transition={{ duration: 1, repeat: isRecording ? Infinity : 0 }}
-              className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${isRecording ? 'bg-red-500' : 'bg-green-500'
-                }`}
-            >
-              <Mic className="h-12 w-12 text-white" />
-            </motion.div>
+        <div className="p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Recording Section */}
+            <div className="text-center">
+              <div className="mb-8">
+                <motion.div
+                  animate={{ scale: isRecording ? [1, 1.2, 1] : 1 }}
+                  transition={{ duration: 1, repeat: isRecording ? Infinity : 0 }}
+                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-4 ${isRecording ? 'bg-red-500' : 'bg-green-500'
+                    }`}
+                >
+                  <Mic className="h-16 w-16 text-white" />
+                </motion.div>
 
-            {isRecording ? (
-              <div>
-                <p className="text-lg font-semibold text-red-600 mb-2">Recording...</p>
-                <p className="text-3xl font-mono text-gray-900">{Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}</p>
+                {isRecording ? (
+                  <div>
+                    <p className="text-lg font-semibold text-red-600 mb-2">Recording...</p>
+                    <p className="text-3xl font-mono text-gray-900 mb-4">
+                      {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                    </p>
+                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span>AI is listening and analyzing...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-lg text-gray-600 mb-4">Tap to start recording</p>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <Bot className="h-4 w-4 inline mr-1" />
+                        AI will automatically detect threat type, urgency level, and extract key details from your voice
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <p className="text-lg text-gray-600">Tap to start recording</p>
-            )}
-          </div>
 
-          <div className="space-y-4">
-            <button
-              onClick={() => setIsRecording(!isRecording)}
-              className={`w-full py-3 px-6 rounded-xl font-medium transition-colors ${isRecording
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-                }`}
-            >
-              {isRecording ? 'Stop Recording' : 'Start Recording'}
-            </button>
+              <div className="space-y-4">
+                <button
+                  onClick={() => setIsRecording(!isRecording)}
+                  className={`w-full py-3 px-6 rounded-xl font-medium transition-colors ${isRecording
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                    }`}
+                >
+                  {isRecording ? 'Stop Recording' : 'Start Recording'}
+                </button>
 
-            <div className="flex space-x-3">
-              <button
-                onClick={onClose}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={recordingTime === 0}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
-              >
-                Submit
-              </button>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={onClose}
+                    className="flex-1 py-2 px-4 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={recordingTime === 0}
+                    onClick={() => {
+                      // Show success toast and close modal
+                      showToast('Voice report submitted successfully! AI analysis in progress.', 'success');
+                      onClose();
+                    }}
+                    className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    Submit Report
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Analysis Section */}
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Brain className="h-5 w-5 mr-2 text-blue-600" />
+                  AI Analysis
+                </h3>
+
+                {showAiForm ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Threat Type</label>
+                        <input
+                          type="text"
+                          value={detectedInfo.threatType}
+                          onChange={(e) => setDetectedInfo({ ...detectedInfo, threatType: e.target.value })}
+                          className="w-full p-2 border border-gray-300 rounded-lg bg-green-50"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Urgency Level</label>
+                        <select
+                          value={detectedInfo.urgency}
+                          onChange={(e) => setDetectedInfo({ ...detectedInfo, urgency: e.target.value })}
+                          className="w-full p-2 border border-gray-300 rounded-lg bg-green-50"
+                        >
+                          <option value="High">High</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Low">Low</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <input
+                        type="text"
+                        value={detectedInfo.location}
+                        onChange={(e) => setDetectedInfo({ ...detectedInfo, location: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-lg bg-green-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Time of Incident</label>
+                      <input
+                        type="text"
+                        value={detectedInfo.timeOfIncident}
+                        onChange={(e) => setDetectedInfo({ ...detectedInfo, timeOfIncident: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-lg bg-green-50"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">AI analysis will appear here after recording</p>
+                  </div>
+                )}
+              </div>
+
+              {aiSuggestions.length > 0 && (
+                <div className="bg-yellow-50 p-6 rounded-xl">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <Zap className="h-5 w-5 mr-2 text-yellow-600" />
+                    AI Detected Key Points
+                  </h4>
+                  <ul className="space-y-2">
+                    {aiSuggestions.map((suggestion, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" />
+                        <span className="text-sm text-gray-700">{suggestion}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -955,8 +1427,8 @@ const AutoDetectionModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <span className="font-medium text-gray-900">{feature.name}</span>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${feature.color === 'green' ? 'bg-green-100 text-green-800' :
-                    feature.color === 'orange' ? 'bg-orange-100 text-orange-800' :
-                      'bg-blue-100 text-blue-800'
+                  feature.color === 'orange' ? 'bg-orange-100 text-orange-800' :
+                    'bg-blue-100 text-blue-800'
                   }`}>
                   {feature.status}
                 </span>
@@ -1060,6 +1532,377 @@ const ComplaintDetailsModal: React.FC<{ complaint: any; onClose: () => void }> =
           >
             Close
           </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Settings Modal Component
+const SettingsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [settings, setSettings] = useState({
+    notifications: {
+      emailAlerts: true,
+      smsAlerts: true,
+      pushNotifications: true,
+      threatUpdates: true,
+      weeklyReports: false
+    },
+    security: {
+      twoFactorAuth: true,
+      sessionTimeout: 30,
+      autoLock: true,
+      biometricAuth: false
+    },
+    privacy: {
+      shareWithUnits: true,
+      anonymousReporting: false,
+      dataRetention: 90
+    },
+    display: {
+      theme: 'light',
+      timezone: 'Asia/Kolkata'
+    }
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Settings className="h-6 w-6 mr-2 text-blue-600" />
+                Settings & Preferences
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">Customize your security and notification preferences</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-8 space-y-8">
+          {/* Notifications Settings */}
+          <div className="bg-yellow-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Bell className="h-5 w-5 mr-2 text-yellow-600" />
+              Notification Preferences
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(settings.notifications).map(([key, value]) => (
+                <label key={key} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700 capitalize">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={value}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      notifications: { ...prev.notifications, [key]: e.target.checked }
+                    }))}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Security Settings */}
+          <div className="bg-red-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Shield className="h-5 w-5 mr-2 text-red-600" />
+              Security Settings
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Two-Factor Authentication</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.security.twoFactorAuth}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      security: { ...prev.security, twoFactorAuth: e.target.checked }
+                    }))}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Auto Lock Screen</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.security.autoLock}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      security: { ...prev.security, autoLock: e.target.checked }
+                    }))}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                </label>
+              </div>
+              <div className="bg-white p-3 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Session Timeout (minutes)
+                </label>
+                <select
+                  value={settings.security.sessionTimeout}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    security: { ...prev.security, sessionTimeout: parseInt(e.target.value) }
+                  }))}
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                >
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                  <option value={60}>1 hour</option>
+                  <option value={120}>2 hours</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Privacy Settings */}
+          <div className="bg-green-50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <User className="h-5 w-5 mr-2 text-green-600" />
+              Privacy Settings
+            </h3>
+            <div className="space-y-4">
+              <label className="flex items-center justify-between p-3 bg-white rounded-lg">
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Share Threat Data with Other Units</span>
+                  <p className="text-xs text-gray-500">Help protect other defence personnel</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.privacy.shareWithUnits}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    privacy: { ...prev.privacy, shareWithUnits: e.target.checked }
+                  }))}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+              </label>
+              <div className="bg-white p-3 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Data Retention Period (days)
+                </label>
+                <select
+                  value={settings.privacy.dataRetention}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    privacy: { ...prev.privacy, dataRetention: parseInt(e.target.value) }
+                  }))}
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                >
+                  <option value={30}>30 days</option>
+                  <option value={90}>90 days</option>
+                  <option value={180}>6 months</option>
+                  <option value={365}>1 year</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={onClose}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                // Here you would save the settings
+                onClose();
+              }}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Save Settings
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Notifications Modal Component
+const NotificationsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const notifications = [
+    {
+      id: 1,
+      type: 'threat',
+      title: 'New Phishing Campaign Detected',
+      message: 'A sophisticated phishing campaign targeting Army personnel has been identified. 247 emails blocked automatically.',
+      time: '2 minutes ago',
+      read: false,
+      priority: 'high'
+    },
+    {
+      id: 2,
+      type: 'system',
+      title: 'Security Update Available',
+      message: 'A critical security update is available for your mobile app. Please update immediately.',
+      time: '15 minutes ago',
+      read: false,
+      priority: 'medium'
+    },
+    {
+      id: 3,
+      type: 'report',
+      title: 'Your Voice Report Processed',
+      message: 'Your voice report VR-001 has been processed and classified as "Scam Call". Automatic blocking enabled.',
+      time: '1 hour ago',
+      read: true,
+      priority: 'low'
+    },
+    {
+      id: 4,
+      type: 'alert',
+      title: 'Collective Defense Alert',
+      message: 'A new threat pattern has been shared by Naval Command. Your protection has been automatically updated.',
+      time: '2 hours ago',
+      read: true,
+      priority: 'medium'
+    },
+    {
+      id: 5,
+      type: 'training',
+      title: 'Monthly Cyber Awareness Training',
+      message: 'Your monthly cyber awareness training is due. Complete it by end of this week.',
+      time: '1 day ago',
+      read: false,
+      priority: 'low'
+    }
+  ];
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'threat': return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      case 'system': return <Settings className="h-5 w-5 text-blue-500" />;
+      case 'report': return <FileText className="h-5 w-5 text-green-500" />;
+      case 'alert': return <Bell className="h-5 w-5 text-orange-500" />;
+      case 'training': return <BookOpen className="h-5 w-5 text-purple-500" />;
+      default: return <Info className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'border-l-red-500 bg-red-50';
+      case 'medium': return 'border-l-orange-500 bg-orange-50';
+      case 'low': return 'border-l-green-500 bg-green-50';
+      default: return 'border-l-gray-500 bg-gray-50';
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Bell className="h-6 w-6 mr-2 text-blue-600" />
+                Notifications
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {notifications.filter(n => !n.read).length} unread notifications
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <motion.div
+                key={notification.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-4 rounded-lg border-l-4 ${getPriorityColor(notification.priority)} ${!notification.read ? 'shadow-md' : ''
+                  }`}
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
+                        {notification.title}
+                      </h4>
+                      {!notification.read && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {notification.message}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">
+                        {notification.time}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        {!notification.read && (
+                          <button className="text-xs text-blue-600 hover:text-blue-800">
+                            Mark as read
+                          </button>
+                        )}
+                        <button className="text-xs text-gray-500 hover:text-gray-700">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex justify-between">
+            <button className="text-sm text-blue-600 hover:text-blue-800">
+              Mark all as read
+            </button>
+            <button className="text-sm text-gray-500 hover:text-gray-700">
+              Clear all notifications
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
